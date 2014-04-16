@@ -1,6 +1,7 @@
 package point.components;
 
-public class IndividualsGroup {
+
+public class IndividualsGroup implements Comparable<IndividualsGroup> {
 	
 	private String genotype;
 	private int age;
@@ -38,4 +39,9 @@ public class IndividualsGroup {
 		return genotype.equals(other.genotype) && age==other.age;
 	}
 
+	@Override
+	public int compareTo(IndividualsGroup other) {
+		int genotypesComparation = genotype.compareTo(other.genotype);
+		return genotypesComparation==0? (age-other.age) : genotypesComparation;
+	}
 }

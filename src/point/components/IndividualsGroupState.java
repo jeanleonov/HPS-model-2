@@ -2,12 +2,16 @@ package point.components;
 
 import java.util.Map;
 
+import point.components.Viability.IndividualsGroupViability;
+
 
 public class IndividualsGroupState {
 	
 	public int strength;
 	
-	private int lifetime;
+	private String genotype;
+	private int age;
+	
 	private float survival;
 	private float competitiveness;
 	private float reproduction;
@@ -19,19 +23,17 @@ public class IndividualsGroupState {
 	
 	public IndividualsGroupState(IndividualsGroup group, int strength, Viability viability, Posterity posterity) {
 		this.strength = strength;
-		lifetime = viability.getLifetime(group);
-		survival = viability.getSurvival(group);
-		competitiveness = viability.getCompetitiveness(group);
-		reproduction = viability.getReproduction(group);
-		fertility = viability.getFertility(group);
-		amplexusRepeat = viability.getAmplexusRepeat(group);
-		voracity = viability.getVoracity(group);
+		IndividualsGroupViability groupViability = viability.getGroupViability(group);
+		survival = groupViability.survival;
+		competitiveness = groupViability.competitiveness;
+		reproduction = groupViability.reproduction;
+		fertility = groupViability.fertility;
+		amplexusRepeat = groupViability.amplexusRepeat;
+		voracity = groupViability.voracity;
+		genotype = group.getGenotype();
+		age = group.getAge();
 		if (GenotypeHelper.isFemale(group.getGenotype()) && reproduction>0)
 			posterityComposition = posterity.getCompositionFor(group.getGenotype());
-	}
-
-	public int getLifetime() {
-		return lifetime;
 	}
 
 	public float getSurvival() {
@@ -60,6 +62,14 @@ public class IndividualsGroupState {
 
 	public Map<String, Float> getPosterityComposition(String father) {
 		return posterityComposition.get(father);
+	}
+
+	public String getGenotype() {
+		return genotype;
+	}
+
+	public int getAge() {
+		return age;
 	}
 	
 }

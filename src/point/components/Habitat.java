@@ -1,39 +1,67 @@
 package point.components;
 
 import java.util.Map;
+import java.util.SortedMap;
 
 public class Habitat {
 	
-	private Map<IndividualsGroup, IndividualsGroupState> groupStates;
+	private String habitatName;
+	private SortedMap<IndividualsGroup, IndividualsGroupState> groupsStates;
 	private Viability viability;
 	private Posterity posterity;
+	private Scenario scenario;
+	private Map<String, Float> migrationProbabilities;
+	private float resources;
 	
-	public Habitat(Map<IndividualsGroup, IndividualsGroupState> groupStates,
-			       Viability viability, Posterity posterity) {
-		this.groupStates = groupStates;
+	public final static String EXTERNAL_WORLD = "";
+	
+	public Habitat(SortedMap<IndividualsGroup, IndividualsGroupState> groupsStates,
+			       Viability viability, Posterity posterity, Scenario scenario,
+			       Map<String, Float> migrationProbabilities, float resources,
+			       String habitatName) {
+		this.groupsStates = groupsStates;
 		this.viability = viability;
 		this.posterity = posterity;
+		this.scenario = scenario;
+		this.migrationProbabilities = migrationProbabilities;
+		this.resources = resources;
+		this.habitatName = habitatName;
 	}
 
 	public IndividualsGroupState getState(IndividualsGroup group) {
-		IndividualsGroupState state = groupStates.get(group);
+		IndividualsGroupState state = groupsStates.get(group);
 		if (state == null) {
 			state = new IndividualsGroupState(group, 0, viability, posterity);
-			groupStates.put(group, state);
+			groupsStates.put(group, state);
 		}
 		return state;
 	}
 	
-	public void setGroupStrength(IndividualsGroup group, int strength) {		
-		groupStates.get(group).strength = strength;
+	public Scenario getScenario() {
+		return scenario;
 	}
 	
-	public void increaseGroup(IndividualsGroup group, int toAdd) {
-		getState(group).strength += toAdd;
+	public Map<String, Float> getMigrationProbabilities() {
+		return migrationProbabilities;
 	}
 	
-	public void reduceGroup(IndividualsGroup group, int toSubtract) {
-		getState(group).strength -= toSubtract;
+	public SortedMap<IndividualsGroup, IndividualsGroupState> getGroupsStates() {
+		return groupsStates;
+	}
+	
+	public void setGroupsStates(SortedMap<IndividualsGroup, IndividualsGroupState> map) {
+		groupsStates = map;
 	}
 
+	public float getResources() {
+		return resources;
+	}
+
+	public void setResources(float resources) {
+		this.resources = resources;
+	}
+
+	public String getHabitatName() {
+		return habitatName;
+	}
 }
