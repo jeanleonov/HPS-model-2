@@ -19,6 +19,12 @@ public class IndividualsGroupState {
 	private float amplexusRepeat;
 	private float voracity;
 	
+	private boolean isMatureMale;
+	private boolean isMatureFemale;
+	
+	// additional fields to help PointMover
+	public float percentageInHabitat;
+	
 	private Map<String, Map<String, Float>> posterityComposition;
 	
 	public IndividualsGroupState(IndividualsGroup group, int strength, Viability viability, Posterity posterity) {
@@ -32,6 +38,20 @@ public class IndividualsGroupState {
 		voracity = groupViability.voracity;
 		genotype = group.getGenotype();
 		age = group.getAge();
+		if (reproduction > 0) {
+			if (GenotypeHelper.isMale(genotype)) {
+				isMatureMale = true;
+				isMatureFemale = false;
+			}
+			else {
+				isMatureMale = false;
+				isMatureFemale = true;
+			}
+		}
+		else {
+			isMatureMale = false;
+			isMatureFemale = false;
+		}
 		if (GenotypeHelper.isFemale(group.getGenotype()) && reproduction>0)
 			posterityComposition = posterity.getCompositionFor(group.getGenotype());
 	}
@@ -70,6 +90,14 @@ public class IndividualsGroupState {
 
 	public int getAge() {
 		return age;
+	}
+
+	public boolean isMatureMale() {
+		return isMatureMale;
+	}
+
+	public boolean isMatureFemale() {
+		return isMatureFemale;
 	}
 	
 }

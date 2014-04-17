@@ -1,5 +1,6 @@
 package point_movement;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -65,9 +66,36 @@ public class PointMover {
 	=======================================================
 	---  REPRODUCTION:  -----------------------------------
 	*/
+	private int numberOfMales=0, numberOfFemales=0;
+	private List<IndividualsGroupState> males = new ArrayList<>();
+	private List<IndividualsGroupState> females = new ArrayList<>();
+	
 	private void reproductionPhaseProcessing(Habitat habitat) {
+		initiateMalesAndFemales(habitat);
+		
 		// TODO
 		notifySubscribers(IterationSubStep.REPRODUCTION);
+	}
+	
+	private void initiateMalesAndFemales(Habitat habitat) {
+		numberOfMales=0;
+		numberOfFemales=0;
+		males.clear();
+		females.clear();
+		for(IndividualsGroupState group : habitat.getGroupsStates().values()) {
+			if (group.isMatureMale()) {
+				males.add(group);
+				numberOfMales += group.strength;
+			}
+			else if (group.isMatureFemale()) {
+				females.add(group);
+				numberOfFemales += group.strength;
+			}
+		}
+		for(IndividualsGroupState malesGroup : males)
+			malesGroup.percentageInHabitat = (float) malesGroup.strength / numberOfMales;
+		for(IndividualsGroupState femalesGroup : females)
+			femalesGroup.percentageInHabitat = (float) femalesGroup.strength / numberOfFemales;
 	}
 
 	/*
