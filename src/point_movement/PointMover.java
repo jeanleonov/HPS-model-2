@@ -1,9 +1,12 @@
 package point_movement;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -20,6 +23,10 @@ public class PointMover {
 	private int year;
 	private List<StatisticSubcriber> subscribers;
 	
+	private final static int
+	MAX_SIZE_OF_FEMALES_LIST = 10,
+	MAX_NUMBER_OF_REPRODUCTION_CIRCLES = 10;
+	
 	public enum IterationSubStep {
 		REPRODUCTION,
 		COMPETITION,
@@ -27,6 +34,8 @@ public class PointMover {
 		MOVEMENT,
 		GROWING_UP
 	}
+	
+	private Random rand = new Random();
 	
 	public PointMover(Point firstPoint) {
 		currentPoint = firstPoint;
@@ -66,36 +75,125 @@ public class PointMover {
 	=======================================================
 	---  REPRODUCTION:  -----------------------------------
 	*/
-	private int numberOfMales=0, numberOfFemales=0;
+	private int numberOfLonelyFemales;
 	private List<IndividualsGroupState> males = new ArrayList<>();
-	private List<IndividualsGroupState> females = new ArrayList<>();
+	private List<IndividualsGroupState> lonelyFemales = new ArrayList<>();
+	
+	private IndividualsGroupState[] availableFemales = new IndividualsGroupState[MAX_SIZE_OF_FEMALES_LIST];
+	private float totalAttractivenessOfAvailable;
+	
+	private class ApplicationPack {
+		List<IndividualsGroupState> malesGroups;
+		float totalAttractivenessOfCandidates;
+	}
+	
 	
 	private void reproductionPhaseProcessing(Habitat habitat) {
-		initiateMalesAndFemales(habitat);
-		
-		// TODO
+		initiateMultipliedst(habitat);
+		for (int i=0; i<MAX_NUMBER_OF_REPRODUCTION_CIRCLES; i++) {
+			initiateMalesAndFemales(habitat);
+			Map<IndividualsGroupState, ApplicationPack> applicationsForFemales;
+			applicationsForFemales = determineFemalesPopularity();
+			for (Entry<IndividualsGroupState, ApplicationPack> entry : applicationsForFemales.entrySet()) {
+				float point = (float) Math.random() * entry.getValue().totalAttractivenessOfCandidates;
+				float currentSum = 0f;
+				int j;
+				for (j=0; j<entry.getValue().malesGroups.size(); j++) {
+					currentSum += entry.getValue().malesGroups.get(j).getReproduction();
+					if (point <= currentSum)
+						break;
+				}
+				createPosterity(entry.getKey(), entry.getValue().malesGroups.get(j), habitat);
+			}
+		}
 		notifySubscribers(IterationSubStep.REPRODUCTION);
 	}
 	
+	private void initiateMultipliedst(Habitat habitat) {
+		for(IndividualsGroupState group : habitat.getGroupsStates().values())
+			group.multipliedst = 0;
+	}
+	
 	private void initiateMalesAndFemales(Habitat habitat) {
-		numberOfMales=0;
-		numberOfFemales=0;
+		numberOfLonelyFemales=0;
 		males.clear();
-		females.clear();
+		lonelyFemales.clear();
 		for(IndividualsGroupState group : habitat.getGroupsStates().values()) {
-			if (group.isMatureMale()) {
+			if (group.isMatureMale())
 				males.add(group);
-				numberOfMales += group.strength;
-			}
 			else if (group.isMatureFemale()) {
-				females.add(group);
-				numberOfFemales += group.strength;
+				lonelyFemales.add(group);
+				numberOfLonelyFemales += group.getNotMultipliedst();
 			}
 		}
-		for(IndividualsGroupState malesGroup : males)
-			malesGroup.percentageInHabitat = (float) malesGroup.strength / numberOfMales;
-		for(IndividualsGroupState femalesGroup : females)
-			femalesGroup.percentageInHabitat = (float) femalesGroup.strength / numberOfFemales;
+	}
+	
+	private Map<IndividualsGroupState, ApplicationPack> determineFemalesPopularity() {
+		Map<IndividualsGroupState, ApplicationPack> applicationsForFemales = new LinkedHashMap<>();
+		for (IndividualsGroupState maleGroup : males) {
+			for (int i=0; i<maleGroup.multipliedst; i++)
+				if (Math.random() >= maleGroup.getAmplexusRepeat())
+					chooseFemaleFor(maleGroup, applicationsForFemales);
+			for (int i=0; i<maleGroup.strength-maleGroup.multipliedst; i++)
+				chooseFemaleFor(maleGroup, applicationsForFemales);
+		}
+		return applicationsForFemales;
+	}
+	
+	private void chooseFemaleFor(IndividualsGroupState maleGroup,
+								 Map<IndividualsGroupState, ApplicationPack> applicationsForFemales) {
+		fillAvailableFemales();
+		IndividualsGroupState chosen = chooseFemaleFromAvailable();
+		ApplicationPack applicationsPack = applicationsForFemales.get(chosen);
+		if (applicationsPack == null) {
+			applicationsPack = new ApplicationPack();
+			applicationsPack.malesGroups = new LinkedList<>();
+			applicationsPack.totalAttractivenessOfCandidates = 0f;
+			applicationsForFemales.put(chosen, applicationsPack);
+		}
+		applicationsPack.totalAttractivenessOfCandidates += maleGroup.getReproduction();
+		applicationsPack.malesGroups.add(maleGroup);
+	}
+	
+	private void fillAvailableFemales() {
+		totalAttractivenessOfAvailable = 0f;
+		int numberOfFemales = Math.abs(rand.nextInt()%(MAX_SIZE_OF_FEMALES_LIST+1));
+		for (int i=0, j; i<numberOfFemales; i++) {
+			float point = (float) Math.random() * numberOfLonelyFemales;
+			float currentSum = 0f;
+			for (j=0; i<lonelyFemales.size(); j++) {
+				currentSum += lonelyFemales.get(j).getNotMultipliedst();
+				if (point <= currentSum)
+					break;
+			}
+			availableFemales[i] = lonelyFemales.get(j);
+			totalAttractivenessOfAvailable += availableFemales[i].getReproduction();
+		}
+		for (int i=numberOfFemales; i<availableFemales.length; i++)
+			availableFemales[i] = null;
+	}
+	
+	private IndividualsGroupState chooseFemaleFromAvailable() {
+		float point = (float) Math.random() * totalAttractivenessOfAvailable;
+		float currentSum = 0f;
+		int i;
+		for (i=0; i<availableFemales.length && availableFemales[i]!=null; i++) {
+			currentSum += availableFemales[i].getReproduction();
+			if (point <= currentSum)
+				break;
+		}
+		return availableFemales[i];
+	}
+	
+	private void createPosterity(IndividualsGroupState mother,
+								 IndividualsGroupState father,
+								 Habitat habitat) {
+		Map<String,Float> posterityComposition = mother.getPosterityComposition(father.getGenotype());
+		for (Entry<String,Float> entry : posterityComposition.entrySet()) {
+			int born = (int) (father.getFertility() * mother.getFertility() * entry.getValue());
+			IndividualsGroup childsGroup = new IndividualsGroup(entry.getKey(), 0);
+			habitat.getState(childsGroup).strength += born;
+		}
 	}
 
 	/*

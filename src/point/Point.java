@@ -1,6 +1,6 @@
 package point;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +13,7 @@ public class Point {
 	
 	public Point(List<Habitat> habitats) {
 		this.habitats = habitats;
-		namedHabitats = new HashMap<>();
+		namedHabitats = new LinkedHashMap<>();
 		for(Habitat habitat : habitats)
 			namedHabitats.put(habitat.getHabitatName(), habitat);
 	}

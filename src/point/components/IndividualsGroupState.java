@@ -9,6 +9,8 @@ public class IndividualsGroupState {
 	
 	public int strength;
 	
+	public int multipliedst;
+	
 	private String genotype;
 	private int age;
 	
@@ -21,9 +23,6 @@ public class IndividualsGroupState {
 	
 	private boolean isMatureMale;
 	private boolean isMatureFemale;
-	
-	// additional fields to help PointMover
-	public float percentageInHabitat;
 	
 	private Map<String, Map<String, Float>> posterityComposition;
 	
@@ -98,6 +97,21 @@ public class IndividualsGroupState {
 
 	public boolean isMatureFemale() {
 		return isMatureFemale;
+	}
+	
+	public int getNotMultipliedst() {
+		return strength - multipliedst;
+	}
+	
+	@Override
+	public int hashCode() {
+		return genotype.hashCode()+age;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		IndividualsGroupState other = (IndividualsGroupState) obj;
+		return genotype.equals(other.genotype) && age==other.age;
 	}
 	
 }
