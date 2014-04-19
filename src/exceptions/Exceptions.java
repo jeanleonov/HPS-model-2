@@ -41,5 +41,28 @@ public class Exceptions {
 								paramName, min, max, value));
 		}
 	}
-
+	
+	public static class NotInteger extends InvalidInput {
+		private static final long serialVersionUID = 1L;
+		public NotInteger(String actualString) {
+			super(String.format("String representation of an integer was expected, "+
+								"but actual value is \"%s\"", actualString));
+		}
+	}
+	
+	public static class NotFloat extends InvalidInput {
+		private static final long serialVersionUID = 1L;
+		public NotFloat(String actualString) {
+			super(String.format("String representation of an float number was expected, "+
+								"but actual value is \"%s\"", actualString));
+		}
+	}
+	
+	public static class WrongFileStructure extends InvalidInput {
+		private static final long serialVersionUID = 1L;
+		public WrongFileStructure(String inputArea, String message) {
+			super(String.format("Error in input \"%s\":\n%s", inputArea, message));
+		}
+	}
+	
 }
