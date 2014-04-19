@@ -13,57 +13,47 @@ import exceptions.Exceptions.WrongFileStructure;
 public class InitialComposition {
 
 	private Map<IndividualsGroup, Integer> composition;
+	private final static String INPUT_AREA = "Initial composition";
 	
 	public InitialComposition(String input) throws InvalidInput {
-		String[] lines = input.split("\n");
 		composition = new LinkedHashMap<>();
-		if (isInputsEmpty(lines))
+		String[][] rows = CSVHelper.getTrimmedTable(input);
+		if (CSVHelper.isInputsEmpty(rows))
 			return;
-		if (lines.length < 2)
-			throw new WrongFileStructure("Initial composition", "File should containe 2 rows");
-		String[] header = lines[0].split(";");
-		String[] values = lines[1].split(";");
-		if (header.length != values.length)
-			throw new WrongFileStructure("Initial composition", "");
-		processRows(header, values);
+		if (rows.length < 2)
+			throw new WrongFileStructure("File should containe 2 rows", INPUT_AREA);
+		if (!CSVHelper.isTableConsistent(rows))
+			throw new WrongFileStructure("Rows are not consistent", INPUT_AREA);
+		processRows(rows[0], rows[1]);
 	}
 	
 	private void processRows(String[] header, String[] values) throws InvalidInput {
 		for(int i=0; i<header.length; i++) {
-			IndividualsGroup group = parseIndividualsGroup(header[i]);
+			IndividualsGroup group = parseIndividualsGroup(header[i], i+1);
 			int strength;
 			try {
-				strength = Integer.parseInt(values[i].trim());
+				strength = Integer.parseInt(values[i]);
 			} catch(NumberFormatException e) {
-				throw new NotInteger(values[i].trim());
+				throw new NotInteger(values[i], INPUT_AREA, 2, i+1);
 			}
 			composition.put(group, strength);
 		}
 	}
 	
-	private IndividualsGroup parseIndividualsGroup(String source) throws InvalidInput {
+	private IndividualsGroup parseIndividualsGroup(String source, int column) throws InvalidInput {
 		String[] valuePair = source.split("-");
 		if (valuePair.length != 2)
-			throw new WrongFileStructure("Initial composition", "Header cell should be like \"xRxR-3\"");
-		String genotype = valuePair[0].trim();
+			throw new WrongFileStructure("Header cell should be like \"xRxR-3\"", INPUT_AREA);
+		String genotype = valuePair[0];
 		if (!GenotypeHelper.isGenotype(genotype))
-			throw new NotGenotype(genotype);
+			throw new NotGenotype(genotype, INPUT_AREA, 1, column);
 		int age;
 		try {
-			age = Integer.parseInt(valuePair[1].trim());
+			age = Integer.parseInt(valuePair[1]);
 		} catch(NumberFormatException e) {
-			throw new NotInteger(valuePair[1].trim());
+			throw new NotInteger(valuePair[1], INPUT_AREA, 1, column);
 		}
 		return new IndividualsGroup(genotype, age);
-	}
-	
-	private boolean isInputsEmpty(String[] lines) {
-		if (lines.length == 0)
-			return true;
-		for(String line : lines)
-			if (!line.trim().isEmpty())
-				return false;
-		return true;
 	}
 	
 	public Map<IndividualsGroup, Integer> getInitialComposition() {

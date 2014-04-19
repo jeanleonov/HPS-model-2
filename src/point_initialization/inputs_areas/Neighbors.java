@@ -5,50 +5,40 @@ import java.util.Map;
 import java.util.Set;
 
 import exceptions.Exceptions.InvalidInput;
-import exceptions.Exceptions.NotInteger;
+import exceptions.Exceptions.NotFloat;
 import exceptions.Exceptions.UnknownHabitat;
 import exceptions.Exceptions.WrongFileStructure;
 
 public class Neighbors {
 	
 	private Map<String, Float> migrationProbabilities;
+	private final static String INPUT_AREA = "Neighbors";
 
 	public Neighbors(String input, Set<String> existingHabitats) throws InvalidInput {
-		String[] lines = input.split("\n");
 		migrationProbabilities = new LinkedHashMap<>();
-		if (isInputsEmpty(lines))
+		String[][] rows = CSVHelper.getTrimmedTable(input);
+		if (CSVHelper.isInputsEmpty(rows))
 			return;
-		if (lines.length < 2)
-			throw new WrongFileStructure("Neighbors", "File should containe 2 rows");
-		String[] header = lines[0].split(";");
-		String[] values = lines[1].split(";");
-		if (header.length != values.length)
-			throw new WrongFileStructure("Neighbors", "");
-		processRows(header, values, existingHabitats);
+		if (rows.length < 2)
+			throw new WrongFileStructure("File should containe 2 rows", INPUT_AREA);
+		if (!CSVHelper.isTableConsistent(rows))
+			throw new WrongFileStructure("Rows are not consistent", INPUT_AREA);
+		processRows(rows[0], rows[1], existingHabitats);
 	}
 	
 	private void processRows(String[] header, String[] values, Set<String> existingHabitats) throws InvalidInput {
 		for(int i=0; i<header.length; i++) {
-			String habitat = header[i].trim();
+			String habitat = header[i];
 			if (!existingHabitats.contains(habitat))
-				throw new UnknownHabitat(habitat);
+				throw new UnknownHabitat(habitat, INPUT_AREA, 1, i+1);
 			float accessibility;
 			try {
-				accessibility = Float.parseFloat(values[i].trim());
+				accessibility = Float.parseFloat(values[i]);
 			} catch(NumberFormatException e) {
-				throw new NotInteger(values[i].trim());
+				throw new NotFloat(values[i], INPUT_AREA, 2, i+1);
 			}
 			migrationProbabilities.put(habitat, accessibility);
 		}
-	}
-	
-	private boolean isInputsEmpty(String[] lines) {
-		if (lines.length == 0)
-			return true;
-		for(String line : lines)
-			if (!line.trim().isEmpty())
-				return false;
-		return true;
 	}
 	
 	public Map<String, Float> getMigrationProbabilities() {

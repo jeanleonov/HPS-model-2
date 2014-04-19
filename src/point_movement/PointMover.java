@@ -189,6 +189,8 @@ public class PointMover {
 								 IndividualsGroupState father,
 								 Habitat habitat) {
 		Map<String,Float> posterityComposition = mother.getPosterityComposition(father.getGenotype());
+		if (posterityComposition == null)
+			return;
 		for (Entry<String,Float> entry : posterityComposition.entrySet()) {
 			int born = (int) (father.getFertility() * mother.getFertility() * entry.getValue());
 			IndividualsGroup childsGroup = new IndividualsGroup(entry.getKey(), 0);
