@@ -13,20 +13,18 @@ import exceptions.Exceptions.WrongFileStructure;
 public class InitialComposition {
 
 	private Map<IndividualsGroup, Integer> composition;
-	private String[] inputs;
 	
-	public InitialComposition(String[] lines) throws InvalidInput {
+	public InitialComposition(String input) throws InvalidInput {
+		String[] lines = input.split("\n");
 		composition = new LinkedHashMap<>();
-		inputs = lines;
-		if (isInputsEmpty())
+		if (isInputsEmpty(lines))
 			return;
 		if (lines.length < 2)
 			throw new WrongFileStructure("Initial composition", "File should containe 2 rows");
 		String[] header = lines[0].split(";");
 		String[] values = lines[1].split(";");
 		if (header.length != values.length)
-			throw new WrongFileStructure("Initial composition", "Mapping between individuals "+
-										 "groups and its strengthes should be is a mutual");
+			throw new WrongFileStructure("Initial composition", "");
 		processRows(header, values);
 	}
 	
@@ -59,10 +57,10 @@ public class InitialComposition {
 		return new IndividualsGroup(genotype, age);
 	}
 	
-	private boolean isInputsEmpty() {
-		if (inputs.length == 0)
+	private boolean isInputsEmpty(String[] lines) {
+		if (lines.length == 0)
 			return true;
-		for(String line : inputs)
+		for(String line : lines)
 			if (!line.trim().isEmpty())
 				return false;
 		return true;

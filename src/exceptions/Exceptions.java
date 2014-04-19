@@ -65,4 +65,11 @@ public class Exceptions {
 		}
 	}
 	
+	public static class UnknownHabitat extends InvalidInput {
+		private static final long serialVersionUID = 1L;
+		public UnknownHabitat(String actualHabitat) {
+			super(String.format("Habitat %s doesn't exist", actualHabitat));
+		}
+	}
+	
 }

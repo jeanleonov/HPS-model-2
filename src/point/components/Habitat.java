@@ -13,7 +13,7 @@ public class Habitat {
 	private Map<String, Float> migrationProbabilities;
 	private float resources;
 	
-	public final static String EXTERNAL_WORLD = "";
+	public final static String EXTERNAL_WORLD = "-";
 	
 	public Habitat(SortedMap<IndividualsGroup, IndividualsGroupState> groupsStates,
 			       Viability viability, Posterity posterity, Scenario scenario,

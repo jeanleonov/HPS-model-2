@@ -270,6 +270,7 @@ public class PointMover {
 	
 	private void innerMigrationAndEmigration(Habitat habitat) {
 		Map<String, Float> migrationProbabilities = habitat.getMigrationProbabilities();
+		float totalVoracity = getTotalVoracity(habitat);
 		Set<Entry<String, Float>> entries = migrationProbabilities.entrySet();
 		Float totalWeight = 0f;
 		for (Entry<String, Float> entry : entries)
@@ -280,6 +281,8 @@ public class PointMover {
 				double weightSum = 0;
 				double point = Math.random() * totalWeight;
 				for (Entry<String, Float> entry : entries) {
+					if (Math.random() <= getHabitatAttractiveness(habitat, totalVoracity))
+						continue;
 					weightSum += entry.getValue();
 					if (point <= weightSum) {
 						went++;
@@ -296,6 +299,18 @@ public class PointMover {
 			group.strength -= went;
 		}
 		notifySubscribers(IterationSubStep.MOVEMENT);
+	}
+	
+	private float getTotalVoracity(Habitat habitat) {
+		float total = 0f;
+		for (IndividualsGroupState group : habitat.getGroupsStates().values())
+			total += group.strength * group.getVoracity();
+		return total == 0f? 0.00001f : total;
+	}
+	
+	private float getHabitatAttractiveness(Habitat habitat, float totalVoracity) {
+		float preResult = habitat.getResources() / totalVoracity;
+		return preResult > 1f ? 1f : preResult;
 	}
 
 	/*
