@@ -27,28 +27,26 @@ public class Exceptions {
 	
 	public static class Negative extends InvalidInput {
 		private static final long serialVersionUID = 1L;
-		public Negative(String paramName, int value, String inputArea, int row, int column) {
-			super(String.format("The \"%s\" cann't be negative, but actuale value is %d",
-								paramName, value),
+		public Negative(int value, String inputArea, int row, int column) {
+			super(String.format("This parameter cann't be negative, but actuale value is %d", value),
 				  inputArea, row, column);
 		}
-		public Negative(String paramName, double value, String inputArea, int row, int column) {
-			super(String.format("The \"%s\" cann't be negative, but actuale value is %f",
-								paramName, value),
+		public Negative(double value, String inputArea, int row, int column) {
+			super(String.format("This parameter cann't be negative, but actuale value is %f", value),
 				  inputArea, row, column);
 		}
 	}
 	
 	public static class NotInRange extends InvalidInput {
 		private static final long serialVersionUID = 1L;
-		public NotInRange(String paramName, int min, int max, int value, String inputArea, int row, int column) {
-			super(String.format("The \"%s\" cann't be <%d and >%d, but actuale value is %d",
-								paramName, min, max, value),
+		public NotInRange(int min, int max, int value, String inputArea, int row, int column) {
+			super(String.format("This parameter cann't be <%d and >%d, but actuale value is %d",
+								min, max, value),
 				  inputArea, row, column);
 		}
-		public NotInRange(String paramName, float min, float max, float value, String inputArea, int row, int column) {
-			super(String.format("The \"%s\" cann't be <%f and >%f, but actuale value is %f",
-								paramName, min, max, value),
+		public NotInRange(double min, double max, double value, String inputArea, int row, int column) {
+			super(String.format("This parameter cann't be <%f and >%f, but actuale value is %f",
+								min, max, value),
 				  inputArea, row, column);
 		}
 	}
@@ -62,10 +60,10 @@ public class Exceptions {
 		}
 	}
 	
-	public static class NotFloat extends InvalidInput {
+	public static class NotDouble extends InvalidInput {
 		private static final long serialVersionUID = 1L;
-		public NotFloat(String actualString, String inputArea, int row, int column) {
-			super(String.format("String representation of an float number was expected, "+
+		public NotDouble(String actualString, String inputArea, int row, int column) {
+			super(String.format("String representation of an double number was expected, "+
 								"but actual value is \"%s\"", actualString),
 				  inputArea, row, column);
 		}
@@ -90,6 +88,14 @@ public class Exceptions {
 		private static final long serialVersionUID = 1L;
 		public WrongParentsPair(String first, String second, String inputArea, int row, int column) {
 			super(String.format("Individuals with the same sex (%s and %s) cann't create posterity", first, second),
+				  inputArea, row, column);
+		}
+	}
+	
+	public static class ConflictingData extends InvalidInput {
+		private static final long serialVersionUID = 1L;
+		public ConflictingData(String message, String inputArea, int row, int column) {
+			super(String.format("Conflicting data (%s)", message),
 				  inputArea, row, column);
 		}
 	}
