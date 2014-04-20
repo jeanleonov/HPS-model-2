@@ -5,14 +5,14 @@ import java.util.Map;
 
 public class Posterity {
 	
-	private Map<String, Map<String, Map<String, Float>>> motherPosteritiesMap;
+	private Map<String, Map<String, Map<String, Double>>> motherPosteritiesMap;
 	
 	public Posterity() {
 		motherPosteritiesMap = new LinkedHashMap<>();
 	}
 	
-	public void addCompositionFor(String mother, String father, Map<String, Float> posterityComposition) {
-		Map<String, Map<String, Float>> motherPosterities = motherPosteritiesMap.get(mother);
+	public void addCompositionFor(String mother, String father, Map<String, Double> posterityComposition) {
+		Map<String, Map<String, Double>> motherPosterities = motherPosteritiesMap.get(mother);
 		if (motherPosterities == null) {
 			motherPosterities = new LinkedHashMap<>();
 			motherPosteritiesMap.put(mother, motherPosterities);
@@ -20,7 +20,7 @@ public class Posterity {
 		motherPosterities.put(father, posterityComposition);
 	}
 	
-	public Map<String, Map<String, Float>> getCompositionFor(String genotype) {
+	public Map<String, Map<String, Double>> getCompositionFor(String genotype) {
 		return motherPosteritiesMap.get(genotype);
 	}
 	

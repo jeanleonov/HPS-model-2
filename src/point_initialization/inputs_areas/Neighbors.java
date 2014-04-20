@@ -5,13 +5,13 @@ import java.util.Map;
 import java.util.Set;
 
 import exceptions.Exceptions.InvalidInput;
-import exceptions.Exceptions.NotFloat;
+import exceptions.Exceptions.NotDouble;
 import exceptions.Exceptions.UnknownHabitat;
 import exceptions.Exceptions.WrongFileStructure;
 
 public class Neighbors {
 	
-	private Map<String, Float> migrationProbabilities;
+	private Map<String, Double> migrationProbabilities;
 	private final static String INPUT_AREA = "Neighbors";
 
 	public Neighbors(String input, Set<String> existingHabitats) throws InvalidInput {
@@ -31,17 +31,17 @@ public class Neighbors {
 			String habitat = header[i];
 			if (!existingHabitats.contains(habitat))
 				throw new UnknownHabitat(habitat, INPUT_AREA, 1, i+1);
-			float accessibility;
+			double accessibility;
 			try {
-				accessibility = Float.parseFloat(values[i]);
+				accessibility = Double.parseDouble(values[i]);
 			} catch(NumberFormatException e) {
-				throw new NotFloat(values[i], INPUT_AREA, 2, i+1);
+				throw new NotDouble(values[i], INPUT_AREA, 2, i+1);
 			}
 			migrationProbabilities.put(habitat, accessibility);
 		}
 	}
 	
-	public Map<String, Float> getMigrationProbabilities() {
+	public Map<String, Double> getMigrationProbabilities() {
 		return migrationProbabilities;
 	}
 	

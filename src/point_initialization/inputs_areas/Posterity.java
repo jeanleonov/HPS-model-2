@@ -5,7 +5,7 @@ import java.util.Map;
 
 import point.components.GenotypeHelper;
 import exceptions.Exceptions.InvalidInput;
-import exceptions.Exceptions.NotFloat;
+import exceptions.Exceptions.NotDouble;
 import exceptions.Exceptions.NotGenotype;
 import exceptions.Exceptions.WrongFileStructure;
 import exceptions.Exceptions.WrongParentsPair;
@@ -56,13 +56,13 @@ public class Posterity {
 				throw new WrongParentsPair(row[0], row[1], INPUT_AREA, rowNumber, 1);
 			mother = row[1];
 		}
-		Map<String,Float> composition = new LinkedHashMap<>();
+		Map<String,Double> composition = new LinkedHashMap<>();
 		for (int i=2; i<row.length; i++) {
-			float percentage;
+			double percentage;
 			try {
-				percentage = Float.parseFloat(row[i]);
+				percentage = Double.parseDouble(row[i]);
 			} catch (NumberFormatException e) {
-				throw new NotFloat(row[i], INPUT_AREA, rowNumber, i+1);
+				throw new NotDouble(row[i], INPUT_AREA, rowNumber, i+1);
 			}
 			composition.put(header[i], percentage);
 		}

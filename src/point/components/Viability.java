@@ -33,78 +33,78 @@ public class Viability {
 		return groupViability;
 	}
 	
-	private float computeSurvival(int age, GenotypeViability genotypeViability) {
+	private double computeSurvival(int age, GenotypeViability genotypeViability) {
 		if (age > genotypeViability.lifetime)
-			return 0f;
+			return 0.0;
 		int aS = genotypeViability.survivalAchieveAge;
-		float S = genotypeViability.survival;
+		double S = genotypeViability.survival;
 		if (age <= aS) {
 			if (age == aS)
 				return S;
-			float kbS = genotypeViability.survivalCoefficientBeforeAchiveAge;
-			float curS = genotypeViability.survivalFirst;
+			double kbS = genotypeViability.survivalCoefficientBeforeAchiveAge;
+			double curS = genotypeViability.survivalFirst;
 			for (int curAge=0; curAge<age; curAge++)
 				curS += (S - curS) * kbS;
 		}
-		float kS = genotypeViability.survivalCoefficient;
-		float curS = S;
+		double kS = genotypeViability.survivalCoefficient;
+		double curS = S;
 		for (int curAge=aS; curAge<age; curAge++)
 			curS += (1 - curS) * kS;
 		return curS;
 	}
-	private float computeCompetitiveness(int age, GenotypeViability genotypeViability) {
+	private double computeCompetitiveness(int age, GenotypeViability genotypeViability) {
 		if (age > genotypeViability.lifetime)
-			return 0f;
+			return 0.0;
 		int aC = genotypeViability.competitivenessAchieveAge;
-		float C = genotypeViability.competitiveness;
+		double C = genotypeViability.competitiveness;
 		if (age <= aC) {
 			if (age == aC)
 				return C;
-			float kbC = genotypeViability.competitivenessCoefficientBeforeAchiveAge;
-			float curC = genotypeViability.competitivenessFirst;
+			double kbC = genotypeViability.competitivenessCoefficientBeforeAchiveAge;
+			double curC = genotypeViability.competitivenessFirst;
 			for (int curAge=0; curAge<age; curAge++)
 				curC += (C - curC) * kbC;
 		}
-		float kC = genotypeViability.competitivenessCoefficient;
-		float curC = C;
+		double kC = genotypeViability.competitivenessCoefficient;
+		double curC = C;
 		for (int curAge=aC; curAge<age; curAge++)
 			curC += (1 - curC) * kC;
 		return curC;
 	}
-	private float computeReproduction(int age, GenotypeViability genotypeViability) {
+	private double computeReproduction(int age, GenotypeViability genotypeViability) {
 		if (age <= genotypeViability.spawning) {
 			if (age == genotypeViability.spawning)
 				return genotypeViability.reproduction;
-			return 0f;
+			return 0.0;
 		}
-		float curR = genotypeViability.reproduction;
+		double curR = genotypeViability.reproduction;
 		for (int curAge=genotypeViability.spawning; curAge<age; curAge++)
 			curR += (1 - curR) * genotypeViability.reproductionCoefficient; 
 		return curR;
 	}
-	private float computeFertility(int age, GenotypeViability genotypeViability) {
+	private double computeFertility(int age, GenotypeViability genotypeViability) {
 		if (age <= genotypeViability.spawning) {
 			if (age == genotypeViability.spawning)
 				return genotypeViability.fertility;
-			return 0f;
+			return 0.0;
 		}
-		float curF = genotypeViability.fertility;
+		double curF = genotypeViability.fertility;
 		for (int curAge=genotypeViability.spawning; curAge<age; curAge++)
 			curF += (1 - curF) * genotypeViability.fertilityCoefficient; 
 		return curF;
 	}
-	private float computeAmplexusRepeat(int age, GenotypeViability genotypeViability) {
+	private double computeAmplexusRepeat(int age, GenotypeViability genotypeViability) {
 		if (age <= genotypeViability.spawning) {
 			if (age == genotypeViability.spawning)
 				return genotypeViability.amplexusRepeat;
-			return 0f;
+			return 0.0;
 		}
-		float curAR = genotypeViability.amplexusRepeat;
+		double curAR = genotypeViability.amplexusRepeat;
 		for (int curAge=genotypeViability.spawning; curAge<age; curAge++)
 			curAR += (1 - curAR) * genotypeViability.amplexusRepeatCoefficient; 
 		return curAR;
 	}
-	private float computeVoracity(int age, GenotypeViability genotypeViability) {
+	private double computeVoracity(int age, GenotypeViability genotypeViability) {
 		switch (age + 1) {
 		case 1:
 			return genotypeViability.voracity01;
@@ -132,42 +132,42 @@ public class Viability {
 	}
 	
 	public static class GenotypeViability {
-		int lifetime;
-		int spawning;
-		float survival;
-		int survivalAchieveAge;
-		float survivalCoefficient;
-		float survivalFirst;
-		float survivalCoefficientBeforeAchiveAge;
-		float competitiveness;
-		int competitivenessAchieveAge;
-		float competitivenessCoefficient;
-		float competitivenessFirst;
-		float competitivenessCoefficientBeforeAchiveAge;
-		float reproduction;
-		float reproductionCoefficient;
-		float fertility;
-		float fertilityCoefficient;
-		float amplexusRepeat;
-		float amplexusRepeatCoefficient;
-		float voracity01;
-		float voracity02;
-		float voracity03;
-		float voracity04;
-		float voracity05;
-		float voracity06;
-		float voracity07;
-		float voracity08;
-		float voracity09;
-		float voracity10;
+		public int lifetime;
+		public int spawning;
+		public double survival;
+		public int survivalAchieveAge;
+		public double survivalCoefficient;
+		public double survivalFirst;
+		public double survivalCoefficientBeforeAchiveAge;
+		public double competitiveness;
+		public int competitivenessAchieveAge;
+		public double competitivenessCoefficient;
+		public double competitivenessFirst;
+		public double competitivenessCoefficientBeforeAchiveAge;
+		public double reproduction;
+		public double reproductionCoefficient;
+		public double fertility;
+		public double fertilityCoefficient;
+		public double amplexusRepeat;
+		public double amplexusRepeatCoefficient;
+		public double voracity01;
+		public double voracity02;
+		public double voracity03;
+		public double voracity04;
+		public double voracity05;
+		public double voracity06;
+		public double voracity07;
+		public double voracity08;
+		public double voracity09;
+		public double voracity10;
 	}
 	
 	public static class IndividualsGroupViability {
-		float survival;
-		float competitiveness;
-		float reproduction;
-		float fertility;
-		float amplexusRepeat;
-		float voracity;
+		double survival;
+		double competitiveness;
+		double reproduction;
+		double fertility;
+		double amplexusRepeat;
+		double voracity;
 	}
 }

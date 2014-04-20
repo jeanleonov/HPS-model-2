@@ -51,14 +51,12 @@ public class PointMover {
 	}
 	
 	private void notifySubscribers(IterationSubStep justFinishedSubStep) {
-		for (StatisticSubcriber subscriber : subscribers)
-			subscriber.saveSystemState(currentPoint, year, justFinishedSubStep);
+		subscribers.stream().forEach(subscriber -> subscriber.saveSystemState(currentPoint, year, justFinishedSubStep));
 	}
 	
 	
 	public void nextYear() {
-		for (Habitat habitat : currentPoint.getHabitats())
-			nextYearIn(habitat);
+		currentPoint.getHabitats().stream().forEach(habitat -> nextYearIn(habitat));
 		year++;
 	}
 	
@@ -80,11 +78,11 @@ public class PointMover {
 	private List<IndividualsGroupState> lonelyFemales = new ArrayList<>();
 	
 	private IndividualsGroupState[] availableFemales = new IndividualsGroupState[MAX_SIZE_OF_FEMALES_LIST];
-	private float totalAttractivenessOfAvailable;
+	private double totalAttractivenessOfAvailable;
 	
 	private class ApplicationPack {
 		List<IndividualsGroupState> malesGroups;
-		float totalAttractivenessOfCandidates;
+		double totalAttractivenessOfCandidates;
 	}
 	
 	
@@ -95,8 +93,8 @@ public class PointMover {
 			Map<IndividualsGroupState, ApplicationPack> applicationsForFemales;
 			applicationsForFemales = determineFemalesPopularity();
 			for (Entry<IndividualsGroupState, ApplicationPack> entry : applicationsForFemales.entrySet()) {
-				float point = (float) Math.random() * entry.getValue().totalAttractivenessOfCandidates;
-				float currentSum = 0f;
+				double point = (double) Math.random() * entry.getValue().totalAttractivenessOfCandidates;
+				double currentSum = 0.0;
 				int j;
 				for (j=0; j<entry.getValue().malesGroups.size(); j++) {
 					currentSum += entry.getValue().malesGroups.get(j).getReproduction();
@@ -148,7 +146,7 @@ public class PointMover {
 		if (applicationsPack == null) {
 			applicationsPack = new ApplicationPack();
 			applicationsPack.malesGroups = new LinkedList<>();
-			applicationsPack.totalAttractivenessOfCandidates = 0f;
+			applicationsPack.totalAttractivenessOfCandidates = 0.0;
 			applicationsForFemales.put(chosen, applicationsPack);
 		}
 		applicationsPack.totalAttractivenessOfCandidates += maleGroup.getReproduction();
@@ -156,11 +154,11 @@ public class PointMover {
 	}
 	
 	private void fillAvailableFemales() {
-		totalAttractivenessOfAvailable = 0f;
+		totalAttractivenessOfAvailable = 0.0;
 		int numberOfFemales = Math.abs(rand.nextInt()%(MAX_SIZE_OF_FEMALES_LIST+1));
 		for (int i=0, j; i<numberOfFemales; i++) {
-			float point = (float) Math.random() * numberOfLonelyFemales;
-			float currentSum = 0f;
+			double point = (double) Math.random() * numberOfLonelyFemales;
+			double currentSum = 0.0;
 			for (j=0; i<lonelyFemales.size(); j++) {
 				currentSum += lonelyFemales.get(j).getNotMultipliedst();
 				if (point <= currentSum)
@@ -174,8 +172,8 @@ public class PointMover {
 	}
 	
 	private IndividualsGroupState chooseFemaleFromAvailable() {
-		float point = (float) Math.random() * totalAttractivenessOfAvailable;
-		float currentSum = 0f;
+		double point = (double) Math.random() * totalAttractivenessOfAvailable;
+		double currentSum = 0.0;
 		int i;
 		for (i=0; i<availableFemales.length && availableFemales[i]!=null; i++) {
 			currentSum += availableFemales[i].getReproduction();
@@ -188,10 +186,10 @@ public class PointMover {
 	private void createPosterity(IndividualsGroupState mother,
 								 IndividualsGroupState father,
 								 Habitat habitat) {
-		Map<String,Float> posterityComposition = mother.getPosterityComposition(father.getGenotype());
+		Map<String,Double> posterityComposition = mother.getPosterityComposition(father.getGenotype());
 		if (posterityComposition == null)
 			return;
-		for (Entry<String,Float> entry : posterityComposition.entrySet()) {
+		for (Entry<String,Double> entry : posterityComposition.entrySet()) {
 			int born = (int) (father.getFertility() * mother.getFertility() * entry.getValue());
 			IndividualsGroup childsGroup = new IndividualsGroup(entry.getKey(), 0);
 			habitat.getState(childsGroup).strength += born;
@@ -212,19 +210,19 @@ public class PointMover {
 	}
 	
 	private void simulateCompetition(Habitat habitat) {
-		float totalSumOfAntiCompetetiveness = 0;
-		float totalSumOfVoracity = 0;
-		float weightedTotalSumOfVoracity = 0;
+		double totalSumOfAntiCompetetiveness = 0;
+		double totalSumOfVoracity = 0;
+		double weightedTotalSumOfVoracity = 0;
 		int numberOfIndividuals = 0;
 		for(IndividualsGroupState group : habitat.getGroupsStates().values()) {
-			totalSumOfAntiCompetetiveness += group.strength * (1f - group.getCompetitiveness());
+			totalSumOfAntiCompetetiveness += group.strength * (1.0 - group.getCompetitiveness());
 			totalSumOfVoracity += group.strength * group.getVoracity();
 			numberOfIndividuals += group.strength;
 			weightedTotalSumOfVoracity += group.strength * (group.getVoracity() * group.getCompetitiveness());
 		}
 		if(totalSumOfVoracity <= habitat.getResources())
 			return;
-		float coeficient = totalSumOfVoracity-habitat.getResources();
+		double coeficient = totalSumOfVoracity-habitat.getResources();
 		coeficient /= habitat.getResources();
 		coeficient *= numberOfIndividuals;
 		coeficient /= totalSumOfAntiCompetetiveness;
@@ -233,7 +231,7 @@ public class PointMover {
 		for(IndividualsGroupState group : habitat.getGroupsStates().values()) {
 			int dead = 0;
 			for(int i=0; i<group.strength; i++)
-				if (Math.random() <= 1f - group.getCompetitiveness()/coeficient)
+				if (Math.random() <= 1.0 - group.getCompetitiveness()/coeficient)
 					dead++;
 			group.strength -= dead;
 		}
@@ -271,18 +269,16 @@ public class PointMover {
 	}
 	
 	private void innerMigrationAndEmigration(Habitat habitat) {
-		Map<String, Float> migrationProbabilities = habitat.getMigrationProbabilities();
-		float totalVoracity = getTotalVoracity(habitat);
-		Set<Entry<String, Float>> entries = migrationProbabilities.entrySet();
-		Float totalWeight = 0f;
-		for (Entry<String, Float> entry : entries)
-			totalWeight += entry.getValue();
+		Map<String, Double> migrationProbabilities = habitat.getMigrationProbabilities();
+		double totalVoracity = getTotalVoracity(habitat);
+		Set<Entry<String, Double>> entries = migrationProbabilities.entrySet();
+		Double totalWeight = (double) entries.stream().mapToDouble(entry -> entry.getValue()).sum();
 		for(IndividualsGroupState group : habitat.getGroupsStates().values()) {
 			int went = 0;
 			for(int i=0; i<group.strength; i++) {
 				double weightSum = 0;
 				double point = Math.random() * totalWeight;
-				for (Entry<String, Float> entry : entries) {
+				for (Entry<String, Double> entry : entries) {
 					if (Math.random() <= getHabitatAttractiveness(habitat, totalVoracity))
 						continue;
 					weightSum += entry.getValue();
@@ -303,16 +299,16 @@ public class PointMover {
 		notifySubscribers(IterationSubStep.MOVEMENT);
 	}
 	
-	private float getTotalVoracity(Habitat habitat) {
-		float total = 0f;
+	private double getTotalVoracity(Habitat habitat) {
+		double total = 0.0;
 		for (IndividualsGroupState group : habitat.getGroupsStates().values())
 			total += group.strength * group.getVoracity();
-		return total == 0f? 0.00001f : total;
+		return total == 0.0? 0.00000000001 : total;
 	}
 	
-	private float getHabitatAttractiveness(Habitat habitat, float totalVoracity) {
-		float preResult = habitat.getResources() / totalVoracity;
-		return preResult > 1f ? 1f : preResult;
+	private double getHabitatAttractiveness(Habitat habitat, double totalVoracity) {
+		double preResult = habitat.getResources() / totalVoracity;
+		return preResult > 1.0 ? 1.0 : preResult;
 	}
 
 	/*

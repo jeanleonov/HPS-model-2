@@ -12,7 +12,7 @@ public class Scenario {
 	}
 	
 	public void addEvent(int year, Map<IndividualsGroup, Integer> immigration,
-						 Float addedResources, Float resourcesMultiplication, Float newResources) {
+						 Double addedResources, Double resourcesMultiplication, Double newResources) {
 		YearEvents events = new YearEvents();
 		events.immigration = immigration;
 		events.addedResources = addedResources;
@@ -28,7 +28,7 @@ public class Scenario {
 		return events.immigration;
 	}
 	
-	public float getResources(int year, float currentResources) {
+	public double getResources(int year, double currentResources) {
 		YearEvents events = history.get(year);
 		if (events == null)
 			return currentResources;
@@ -44,9 +44,9 @@ public class Scenario {
 	
 	private static class YearEvents {		
 		Map<IndividualsGroup, Integer> immigration;
-		Float addedResources;
-		Float resourcesMultiplication;
-		Float newResources;
+		Double addedResources;
+		Double resourcesMultiplication;
+		Double newResources;
 	}
 	
 }

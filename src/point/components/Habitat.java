@@ -10,14 +10,14 @@ public class Habitat {
 	private Viability viability;
 	private Posterity posterity;
 	private Scenario scenario;
-	private Map<String, Float> migrationProbabilities;
-	private float resources;
+	private Map<String, Double> migrationProbabilities;
+	private double resources;
 	
 	public final static String EXTERNAL_WORLD = "-";
 	
 	public Habitat(SortedMap<IndividualsGroup, IndividualsGroupState> groupsStates,
 			       Viability viability, Posterity posterity, Scenario scenario,
-			       Map<String, Float> migrationProbabilities, float resources,
+			       Map<String, Double> migrationProbabilities, double resources,
 			       String habitatName) {
 		this.groupsStates = groupsStates;
 		this.viability = viability;
@@ -41,7 +41,7 @@ public class Habitat {
 		return scenario;
 	}
 	
-	public Map<String, Float> getMigrationProbabilities() {
+	public Map<String, Double> getMigrationProbabilities() {
 		return migrationProbabilities;
 	}
 	
@@ -53,11 +53,11 @@ public class Habitat {
 		groupsStates = map;
 	}
 
-	public float getResources() {
+	public double getResources() {
 		return resources;
 	}
 
-	public void setResources(float resources) {
+	public void setResources(double resources) {
 		this.resources = resources;
 	}
 

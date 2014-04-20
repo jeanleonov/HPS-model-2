@@ -14,17 +14,17 @@ public class IndividualsGroupState {
 	private String genotype;
 	private int age;
 	
-	private float survival;
-	private float competitiveness;
-	private float reproduction;
-	private float fertility;
-	private float amplexusRepeat;
-	private float voracity;
+	private double survival;
+	private double competitiveness;
+	private double reproduction;
+	private double fertility;
+	private double amplexusRepeat;
+	private double voracity;
 	
 	private boolean isMatureMale;
 	private boolean isMatureFemale;
 	
-	private Map<String, Map<String, Float>> posterityComposition;
+	private Map<String, Map<String, Double>> posterityComposition;
 	
 	public IndividualsGroupState(IndividualsGroup group, int strength, Viability viability, Posterity posterity) {
 		this.strength = strength;
@@ -55,31 +55,31 @@ public class IndividualsGroupState {
 			posterityComposition = posterity.getCompositionFor(group.getGenotype());
 	}
 
-	public float getSurvival() {
+	public double getSurvival() {
 		return survival;
 	}
 
-	public float getCompetitiveness() {
+	public double getCompetitiveness() {
 		return competitiveness;
 	}
 
-	public float getReproduction() {
+	public double getReproduction() {
 		return reproduction;
 	}
 
-	public float getFertility() {
+	public double getFertility() {
 		return fertility;
 	}
 
-	public float getAmplexusRepeat() {
+	public double getAmplexusRepeat() {
 		return amplexusRepeat;
 	}
 
-	public float getVoracity() {
+	public double getVoracity() {
 		return voracity;
 	}
 
-	public Map<String, Float> getPosterityComposition(String father) {
+	public Map<String, Double> getPosterityComposition(String father) {
 		return posterityComposition.get(father);
 	}
 
