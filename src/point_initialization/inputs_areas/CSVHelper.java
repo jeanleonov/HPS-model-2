@@ -22,6 +22,23 @@ public class CSVHelper {
 			for (int j = 0; j < rows[i].length; j++)
 				rows[i][j] = rows[i][j].trim();
 		}
+		int emptyRows=0;
+		for (int i = rows.length-1; i>=0; i--, emptyRows++) {
+			boolean isRowEmpty=true;
+			for (int j = 0; j<rows[i].length; j++)
+				if (!rows[i][j].isEmpty()) {
+					isRowEmpty = false;
+					break;
+				}
+			if (!isRowEmpty)
+				break;
+		}
+		if (emptyRows != 0) {
+			String[][] filledRows = new String[lines.length-emptyRows][];
+			for (int i=0; i<filledRows.length; i++)
+				filledRows[i] = rows[i];
+			return filledRows;
+		}
 		return rows;
 	}
 

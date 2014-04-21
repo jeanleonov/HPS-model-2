@@ -152,4 +152,8 @@ public class Viability {
 			throw new NotInRange(min, max, value, INPUT_AREA, rowNumber, columnNumber);
 		return value;
 	}
+
+	public point.components.Viability getViability() {
+		return viability;
+	}
 }

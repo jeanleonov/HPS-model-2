@@ -8,7 +8,7 @@ public class Exceptions {
 		private static final long serialVersionUID = 1L;
 		public InvalidInput(String message, String inputArea, int row, int column) {
 			super(String.format("Error in input \"%s\" (row# %d, column# %d):\n%s",
-								inputArea, message, row, column));
+								inputArea, row, column, message));
 		}
 		public InvalidInput(String message, String inputArea) {
 			super(String.format("Error in input \"%s\":\n%s",
