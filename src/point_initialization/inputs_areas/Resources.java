@@ -9,12 +9,12 @@ public class Resources {
 	private final static String INPUT_AREA = "Resources";
 	
 	public Resources(String input) throws InvalidInput {
-		input = input.trim();
-		if (input.isEmpty())
+		String[][] rows = CSVHelper.getTrimmedTable(input);
+		if (CSVHelper.isInputsEmpty(rows))
 			resources = 0;
 		else {
 			try {
-				resources = Double.parseDouble(input);
+				resources = Double.parseDouble(rows[0][0]);
 			} catch (NumberFormatException e) {
 				throw new NotDouble(input, INPUT_AREA, 1, 1);
 			}
