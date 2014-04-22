@@ -1,8 +1,5 @@
 package point_initialization;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,19 +7,31 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import point_initialization.inputs_areas.CSVHelper;
+import exceptions.Exceptions.InvalidInput;
+import exceptions.Exceptions.Negative;
+import exceptions.Exceptions.NotDouble;
+import exceptions.Exceptions.NotInteger;
+import exceptions.Exceptions.UnknownDimension;
+import exceptions.Exceptions.WrongDimensionType;
+import exceptions.Exceptions.WrongFileStructure;
+import exceptions.Exceptions.WrongPointNumber;
+import exceptions.Exceptions.WrongUsageOfDimension;
+
 /** 
  * Class that prepares inputs for the new point of configuration space 
  * */
 public class InputsPreparer {
 	
-	private FileReader fileReader;
-	private BufferedReader dimensionsConfigurationsReader;
 	private List<String> dimensionsIDs;
 	private List<DimensionType> dimensionTypes;
 	private List<Integer> totalSteps;
 	private List<Integer> currentSteps;
 	private Map<String,String> onPointValues;
 	private int pointNumber;
+	private String dimensionsToTestCSV;
+	
+	private final static String INPUT_AREA = "Dimensions";
 	
 	private enum DimensionType {
 		INTEGER,
@@ -34,9 +43,8 @@ public class InputsPreparer {
 	private static final String computedValuesRegex = "(?<static>(?s).+?)?(:?#\\[(?<dinamic>.*?)\\])|(?<juststatic>(?s).*)";
 	private static final String computedValueTemplateRegex = "(?<dimension>\\w+)(:?\\((?<valueName>\\w+)\\))?:(?<first>[\\d.,]+)-(?<last>[\\d.,]+)";
 
-	public InputsPreparer(String dimensionsToTestPath) throws IOException {
-		this.fileReader = new FileReader(dimensionsToTestPath);
-		this.dimensionsConfigurationsReader = new BufferedReader(fileReader);
+	public InputsPreparer(String dimensionsToTestCSV) throws InvalidInput {
+		this.dimensionsToTestCSV = dimensionsToTestCSV;
 		this.dimensionsIDs = new ArrayList<>();
 		this.dimensionTypes = new ArrayList<DimensionType>();
 		this.totalSteps = new ArrayList<>();
@@ -45,41 +53,43 @@ public class InputsPreparer {
 		initDimensions();
 	}
 	
-	public void setPoint(int point) throws IOException {
+	public void setPoint(int point) throws InvalidInput {
 		pointNumber = point;
 		onPointValues.clear();
 		currentSteps.clear();
 		initCurrentSteps();
 	}
 	
-	private void initDimensions() throws IOException {
-		String line;
-		while ((line = dimensionsConfigurationsReader.readLine()) != null) {
-			if (line.isEmpty())
-				continue;
-			String[] cells = line.replace(" ", "").split(";");
-			String dimensionID = cells[0];
-			String type = cells[1];
-			Integer steps = Integer.parseInt(cells[2]);
-			dimensionsIDs.add(dimensionID);
-			dimensionTypes.add(getTypeByString(type));
+	private void initDimensions() throws InvalidInput {
+		String[][] rows = CSVHelper.getTrimmedTable(dimensionsToTestCSV);
+		if (CSVHelper.isInputsEmpty(rows))
+			return;
+		if (!CSVHelper.isTableConsistent(rows) || rows[0].length != 3)
+			throw new WrongFileStructure("Rows are not consistent", INPUT_AREA);
+		for (int i=0; i<rows.length; i++) {
+			int steps;
+			try {
+				steps = Integer.parseInt(rows[i][2]);
+			} catch(NumberFormatException e) {
+				throw new NotInteger(rows[i][2], INPUT_AREA, i+1, 3);
+			}
+			if (steps < 0)
+				throw new Negative(steps, INPUT_AREA, i+1, 3);
+			dimensionsIDs.add(rows[i][0]);
+			if (rows[i][1].equals("integer"))
+				dimensionTypes.add(DimensionType.INTEGER);
+			else if (rows[i][1].equals("float"))
+				dimensionTypes.add(DimensionType.FLOAT);
+			else if (rows[i][1].equals("enumeration"))
+				dimensionTypes.add(DimensionType.ENUMERATION);
+			else throw new WrongDimensionType(rows[i][1], INPUT_AREA, i+1, 2);
 			totalSteps.add(steps);
 		}
 	}
 	
-	private DimensionType getTypeByString(String clazz) throws IOException {
-		if (clazz.equals("integer"))
-			return DimensionType.INTEGER;
-		if (clazz.equals("float"))
-			return DimensionType.FLOAT;
-		if (clazz.equals("enumeration"))
-			return DimensionType.ENUMERATION;
-		throw new IOException("Wrong content of file with dimensions configurations. \n");
-	}
-	
-	private void initCurrentSteps() throws IOException {
+	private void initCurrentSteps() throws InvalidInput {
 		if (pointNumber > maxPointNumber())
-			throw new IOException("Too big point number.");
+			throw new WrongPointNumber(pointNumber);
 		int summaryStepsLeft = pointNumber;
 		for (int i=0; i<dimensionsIDs.size(); i++) {
 			int totalsProduct = 1;
@@ -97,12 +107,15 @@ public class InputsPreparer {
 		return result-1;
 	}
 	
-	public String getPreparedContent(String content) throws IOException {
+	private String currentInputArea;
+	
+	public String getPreparedContent(String content, String inputArea) throws InvalidInput {
+		currentInputArea = inputArea;
 		String withComputed = replaceComputed(content);
 		return replaceEnumerated(withComputed);
 	}
 	
-	public String replaceComputed(String content) throws IOException {
+	public String replaceComputed(String content) throws InvalidInput {
 		Matcher matcher = Pattern.compile(computedValuesRegex).matcher(content);
 		StringBuilder prepared = new StringBuilder("");
 		while(matcher.find()) {
@@ -118,7 +131,7 @@ public class InputsPreparer {
 		return prepared.toString();
 	}
 	
-	public String replaceEnumerated(String content) throws IOException {
+	public String replaceEnumerated(String content) throws InvalidInput {
 		Matcher matcher = Pattern.compile(enumeratedValuesRegex).matcher(content);
 		StringBuilder prepared = new StringBuilder("");
 		while(matcher.find()) {
@@ -126,12 +139,20 @@ public class InputsPreparer {
 			String dinamic = "";
 			if (staticPart == null) {
 				staticPart = matcher.group("static");
-				String dimension = matcher.group("dimension").replace(" ", "");
+				if (staticPart == null)
+					staticPart = "";
+				String dimension = matcher.group("dimension");
+				if (dimension != null)
+					dimension = dimension.replace(" ", "");
+				else
+					throw new WrongUsageOfDimension("Wrong syntax around dimension value template", currentInputArea);
 				int dimensionIndex = dimensionsIDs.indexOf(dimension);
+				if (dimensionIndex == -1)
+					throw new UnknownDimension(dimension, currentInputArea);
 				String value = null;
 				for(int i=0; i<totalSteps.get(dimensionIndex); i++) {
 					if (!matcher.find() || (value = matcher.group("value")) == null)
-						throw new IOException("Enumerated values are too low for dimension "+dimension);
+						throw new WrongUsageOfDimension("Enumerated values are too low for dimension "+dimension, currentInputArea);
 					if (i == currentSteps.get(dimensionIndex))
 						dinamic = value;
 				}
@@ -142,11 +163,12 @@ public class InputsPreparer {
 		return prepared.toString();
 	}
 	
-	private String compileComputedTemplate(String template) throws IOException {
+	private String compileComputedTemplate(String template) throws InvalidInput {
 		template = template.replace(" ", "");
 		Matcher matcher = Pattern.compile(computedValueTemplateRegex).matcher(template);
 		String dim=null, valueName=null, first=null, last=null;
-		matcher.find();
+		if (!matcher.find())
+			throw new WrongUsageOfDimension("Wrong syntax around dimension value template", currentInputArea);
 		dim = matcher.group("dimension");
 		valueName = matcher.group("valueName");
 		first = matcher.group("first");
@@ -158,33 +180,44 @@ public class InputsPreparer {
 		return result;
 	}
 	
-	private String translateComputed(String dimID, String firstValStr, String lastValStr) throws IOException {
+	private String translateComputed(String dimID, String firstValStr, String lastValStr) throws InvalidInput {
 		int dimensionIndex = dimensionsIDs.indexOf(dimID);
+		if (dimensionIndex == -1)
+			throw new UnknownDimension(dimID, currentInputArea);
 		Integer steps = totalSteps.get(dimensionIndex);
 		Integer currentStep = currentSteps.get(dimensionIndex);
 		if (dimensionTypes.get(dimensionIndex).equals(DimensionType.INTEGER)) {
-			Integer first = Integer.parseInt(firstValStr);
-			Integer last = Integer.parseInt(lastValStr);
+			Integer first, last;
+			try {
+				first = Integer.parseInt(firstValStr);
+			} catch(NumberFormatException e) {
+				throw new NotInteger(firstValStr, currentInputArea);
+			}
+			try {
+				last = Integer.parseInt(lastValStr);
+			} catch(NumberFormatException e) {
+				throw new NotInteger(firstValStr, currentInputArea);
+			}
 			return ((Integer)(first + ((last-first)*currentStep)/(steps-1))).toString();
 		}
 		if (dimensionTypes.get(dimensionIndex).equals(DimensionType.FLOAT)) {
-			Double firstInt = Double.parseDouble(firstValStr);
-			Double lastInt = Double.parseDouble(lastValStr);
-			return ((Double)(firstInt + ((lastInt-firstInt)*currentStep)/(steps-1))).toString();
+			Double first, last;
+			try {
+				first = Double.parseDouble(firstValStr);
+			} catch(NumberFormatException e) {
+				throw new NotDouble(firstValStr, currentInputArea);
+			}
+			try {
+				last = Double.parseDouble(lastValStr);
+			} catch(NumberFormatException e) {
+				throw new NotDouble(firstValStr, currentInputArea);
+			}
+			return ((Double)(first + ((last-first)*currentStep)/(steps-1))).toString();
 		}
-		throw new IOException("Changeable token translation was failed.");
+		throw new WrongUsageOfDimension("Enumeration dimension was used as integer of float", currentInputArea);
 	}
 	
 	public Map<String,String> getPrevPointValuesMap() {
 		return onPointValues;
-	}
-	
-	@Override
-	protected void finalize() throws Throwable {
-		if (this.dimensionsConfigurationsReader != null)
-			this.dimensionsConfigurationsReader.close();
-		if (this.fileReader != null)
-			this.fileReader.close();
-		super.finalize();
 	}
 }
