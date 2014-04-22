@@ -90,19 +90,21 @@ public class Scenario {
 			throw new NotInteger(row[0], INPUT_AREA, rowNumber, 1);
 		}
 		for (int i=1; i<row.length; i++) {
-			if (plusColumnNumber == i && !row[i].isEmpty())
+			if (row[i].equals("-"))
+				continue;
+			if (plusColumnNumber == i)
 				try {
 					addResource = Double.parseDouble(row[i]);
 				} catch(NumberFormatException e) {
 					throw new NotDouble(row[i], INPUT_AREA, rowNumber, i+1);
 				}
-			else if (multiplicateColumnNumber == i && !row[i].isEmpty())
+			else if (multiplicateColumnNumber == i)
 				try {
 					multiplicateResource = Double.parseDouble(row[i]);
 				} catch(NumberFormatException e) {
 					throw new NotDouble(row[i], INPUT_AREA, rowNumber, i+1);
 				}
-			else if (newResourceColumnNumber == i && !row[i].isEmpty())
+			else if (newResourceColumnNumber == i)
 				try {
 					newResource = Double.parseDouble(row[i]);
 				} catch(NumberFormatException e) {
