@@ -1,5 +1,8 @@
 package exceptions;
 
+import point.components.GenotypeHelper;
+import point_initialization.inputs_areas.Viability;
+
 public class Exceptions {
 	
 	private Exceptions() {}
@@ -19,9 +22,23 @@ public class Exceptions {
 	public static class NotGenotype extends InvalidInput {
 		private static final long serialVersionUID = 1L;
 		public NotGenotype(String wrongString, String inputArea, int row, int column) {
-			super(String.format("The string \"%s\" is not a presentation of a genotype",
-								wrongString),
-				  inputArea, row, column);
+			super(getMsg(wrongString), inputArea, row, column);
+		}
+		private static String getMsg(String wrongString) {
+			if (GenotypeHelper.isLookedAsGenotype(wrongString)) {
+				String format = "The genotype \"%s\" is unkown. Known are just genotypes, which specified in Viability file";
+				return String.format(format, wrongString);
+			}
+			else
+				return String.format("The string \"%s\" is not a presentation of a genotype",
+									 wrongString);
+		}
+	}
+	
+	public static class NotAllGenotypes extends InvalidInput {
+		private static final long serialVersionUID = 1L;
+		public NotAllGenotypes() {
+			super("All viability files should contain the same set of genotypes", Viability.INPUT_AREA);
 		}
 	}
 	
@@ -58,6 +75,10 @@ public class Exceptions {
 								"but actual value is \"%s\"", actualString),
 				  inputArea, row, column);
 		}
+		public NotInteger(String actualString, String inputArea) {
+			super(String.format("String representation of an integer was expected, "+
+								"but actual value is \"%s\"", actualString), inputArea);
+		}
 	}
 	
 	public static class NotDouble extends InvalidInput {
@@ -66,6 +87,10 @@ public class Exceptions {
 			super(String.format("String representation of an double number was expected, "+
 								"but actual value is \"%s\"", actualString),
 				  inputArea, row, column);
+		}
+		public NotDouble(String actualString, String inputArea) {
+			super(String.format("String representation of an double number was expected, "+
+								"but actual value is \"%s\"", actualString), inputArea);
 		}
 	}
 	
@@ -100,4 +125,33 @@ public class Exceptions {
 		}
 	}
 	
+	public static class WrongDimensionType extends InvalidInput {
+		private static final long serialVersionUID = 1L;
+		public WrongDimensionType(String actualType, String inputArea, int row, int column) {
+			 super(String.format("Dimension type \"%s\" is invalid (only \"integer\", " +
+					 			 "\"float\" and \"enumeration\" are supported)", actualType),
+				  inputArea, row, column);
+		}
+	}
+	
+	public static class UnknownDimension extends InvalidInput {
+		private static final long serialVersionUID = 1L;
+		public UnknownDimension(String actualDimension, String inputArea) {
+			 super(String.format("Dimension \"%s\" is unknown", actualDimension), inputArea);
+		}
+	}
+	
+	public static class WrongPointNumber extends InvalidInput {
+		private static final long serialVersionUID = 1L;
+		public WrongPointNumber(int actualNumber) {
+			 super(String.format("Point number \"%d\" is too big or negative", actualNumber), "Program arguments");
+		}
+	}
+	
+	public static class WrongUsageOfDimension extends InvalidInput {
+		private static final long serialVersionUID = 1L;
+		public WrongUsageOfDimension(String message, String inputArea) {
+			 super(message, inputArea);
+		}
+	}
 }

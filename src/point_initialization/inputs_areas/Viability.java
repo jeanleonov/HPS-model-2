@@ -1,9 +1,15 @@
 package point_initialization.inputs_areas;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import point.components.GenotypeHelper;
 import point.components.Viability.GenotypeViability;
 import exceptions.Exceptions.InvalidInput;
 import exceptions.Exceptions.Negative;
+import exceptions.Exceptions.NotAllGenotypes;
 import exceptions.Exceptions.NotDouble;
 import exceptions.Exceptions.NotGenotype;
 import exceptions.Exceptions.NotInRange;
@@ -13,7 +19,8 @@ import exceptions.Exceptions.WrongFileStructure;
 public class Viability {
 
 	private point.components.Viability viability;
-	private final static String INPUT_AREA = "Viability";
+	public final static String INPUT_AREA = "Viability";
+	private static Set<String> knownGenotypes = new HashSet<>();
 	
 	public Viability(String input) throws InvalidInput {
 		viability = new point.components.Viability();
@@ -38,10 +45,23 @@ public class Viability {
 		}
 	}
 	
-	private void checkAndTrimHeader(String[] header) throws NotGenotype {
-		for (int i=1; i<header.length; i++)
-			if (!GenotypeHelper.isGenotype(header[i]))
-				throw new NotGenotype(header[i], INPUT_AREA, 1, i+1);
+	private void checkAndTrimHeader(String[] header) throws InvalidInput {
+		if (knownGenotypes.isEmpty())
+			for (int i=1; i<header.length; i++) {
+				if (!GenotypeHelper.isLookedAsGenotype(header[i]))
+					throw new NotGenotype(header[i], INPUT_AREA, 1, i+1);
+				knownGenotypes.add(header[i]);
+			}
+		else {
+			Set<String> uniqueGenotypes = new HashSet<>();
+			for (int i=1; i<header.length; i++) {
+				if (!GenotypeHelper.isGenotype(header[i]))
+					throw new NotGenotype(header[i], INPUT_AREA, 1, i+1);
+				uniqueGenotypes.add(header[i]);
+			}
+			if (uniqueGenotypes.size() != knownGenotypes.size())
+				throw new NotAllGenotypes();
+		}
 	}
 	
 	private GenotypeViability parseMaleGenotypeViability(String[][] rows, int columnNumber) throws InvalidInput {
@@ -66,22 +86,22 @@ public class Viability {
 		genotypeViability.			 reproduction = parseDouble(rows[13][columnNumber], 14, columnNumber, 0.0, 1.0);
 		genotypeViability.reproductionCoefficient = parseDouble(rows[14][columnNumber], 15, columnNumber, 0.0, 1.0);
 		
-		genotypeViability.			 fertility = parseDouble(rows[15][columnNumber], 16, columnNumber, 0.0, Double.MAX_VALUE);
+		genotypeViability.			 fertility = parseDouble(rows[15][columnNumber], 16, columnNumber, 0.0, 1.0);
 		genotypeViability.fertilityCoefficient = parseDouble(rows[16][columnNumber], 17, columnNumber, 0.0, 1.0);
 		
 		genotypeViability.			 amplexusRepeat = parseDouble(rows[17][columnNumber], 18, columnNumber, 0.0, 1.0);
 		genotypeViability.amplexusRepeatCoefficient = parseDouble(rows[18][columnNumber], 19, columnNumber, 0.0, 1.0);
 		
-		genotypeViability.voracity01 = parseDouble(rows[19][columnNumber], 20, columnNumber, 0.0, 1.0);
-		genotypeViability.voracity02 = parseDouble(rows[20][columnNumber], 21, columnNumber, 0.0, 1.0);
-		genotypeViability.voracity03 = parseDouble(rows[21][columnNumber], 22, columnNumber, 0.0, 1.0);
-		genotypeViability.voracity04 = parseDouble(rows[22][columnNumber], 23, columnNumber, 0.0, 1.0);
-		genotypeViability.voracity05 = parseDouble(rows[23][columnNumber], 24, columnNumber, 0.0, 1.0);
-		genotypeViability.voracity06 = parseDouble(rows[24][columnNumber], 25, columnNumber, 0.0, 1.0);
-		genotypeViability.voracity07 = parseDouble(rows[25][columnNumber], 26, columnNumber, 0.0, 1.0);
-		genotypeViability.voracity08 = parseDouble(rows[26][columnNumber], 27, columnNumber, 0.0, 1.0);
-		genotypeViability.voracity09 = parseDouble(rows[27][columnNumber], 28, columnNumber, 0.0, 1.0);
-		genotypeViability.voracity10 = parseDouble(rows[28][columnNumber], 29, columnNumber, 0.0, 1.0);
+		genotypeViability.voracity01 = parseDouble(rows[19][columnNumber], 20, columnNumber, 0.0, Double.MAX_VALUE);
+		genotypeViability.voracity02 = parseDouble(rows[20][columnNumber], 21, columnNumber, 0.0, Double.MAX_VALUE);
+		genotypeViability.voracity03 = parseDouble(rows[21][columnNumber], 22, columnNumber, 0.0, Double.MAX_VALUE);
+		genotypeViability.voracity04 = parseDouble(rows[22][columnNumber], 23, columnNumber, 0.0, Double.MAX_VALUE);
+		genotypeViability.voracity05 = parseDouble(rows[23][columnNumber], 24, columnNumber, 0.0, Double.MAX_VALUE);
+		genotypeViability.voracity06 = parseDouble(rows[24][columnNumber], 25, columnNumber, 0.0, Double.MAX_VALUE);
+		genotypeViability.voracity07 = parseDouble(rows[25][columnNumber], 26, columnNumber, 0.0, Double.MAX_VALUE);
+		genotypeViability.voracity08 = parseDouble(rows[26][columnNumber], 27, columnNumber, 0.0, Double.MAX_VALUE);
+		genotypeViability.voracity09 = parseDouble(rows[27][columnNumber], 28, columnNumber, 0.0, Double.MAX_VALUE);
+		genotypeViability.voracity10 = parseDouble(rows[28][columnNumber], 29, columnNumber, 0.0, Double.MAX_VALUE);
 		
 		return genotypeViability;
 	}
@@ -114,16 +134,16 @@ public class Viability {
 		genotypeViability.			 amplexusRepeat = parseDouble(rows[17][columnNumber], 18, columnNumber, 0.0, 1.0);
 		genotypeViability.amplexusRepeatCoefficient = parseDouble(rows[18][columnNumber], 19, columnNumber, 0.0, 1.0);
 		
-		genotypeViability.voracity01 = parseDouble(rows[19][columnNumber], 20, columnNumber, 0.0, 1.0);
-		genotypeViability.voracity02 = parseDouble(rows[20][columnNumber], 21, columnNumber, 0.0, 1.0);
-		genotypeViability.voracity03 = parseDouble(rows[21][columnNumber], 22, columnNumber, 0.0, 1.0);
-		genotypeViability.voracity04 = parseDouble(rows[22][columnNumber], 23, columnNumber, 0.0, 1.0);
-		genotypeViability.voracity05 = parseDouble(rows[23][columnNumber], 24, columnNumber, 0.0, 1.0);
-		genotypeViability.voracity06 = parseDouble(rows[24][columnNumber], 25, columnNumber, 0.0, 1.0);
-		genotypeViability.voracity07 = parseDouble(rows[25][columnNumber], 26, columnNumber, 0.0, 1.0);
-		genotypeViability.voracity08 = parseDouble(rows[26][columnNumber], 27, columnNumber, 0.0, 1.0);
-		genotypeViability.voracity09 = parseDouble(rows[27][columnNumber], 28, columnNumber, 0.0, 1.0);
-		genotypeViability.voracity10 = parseDouble(rows[28][columnNumber], 29, columnNumber, 0.0, 1.0);
+		genotypeViability.voracity01 = parseDouble(rows[19][columnNumber], 20, columnNumber, 0.0, Double.MAX_VALUE);
+		genotypeViability.voracity02 = parseDouble(rows[20][columnNumber], 21, columnNumber, 0.0, Double.MAX_VALUE);
+		genotypeViability.voracity03 = parseDouble(rows[21][columnNumber], 22, columnNumber, 0.0, Double.MAX_VALUE);
+		genotypeViability.voracity04 = parseDouble(rows[22][columnNumber], 23, columnNumber, 0.0, Double.MAX_VALUE);
+		genotypeViability.voracity05 = parseDouble(rows[23][columnNumber], 24, columnNumber, 0.0, Double.MAX_VALUE);
+		genotypeViability.voracity06 = parseDouble(rows[24][columnNumber], 25, columnNumber, 0.0, Double.MAX_VALUE);
+		genotypeViability.voracity07 = parseDouble(rows[25][columnNumber], 26, columnNumber, 0.0, Double.MAX_VALUE);
+		genotypeViability.voracity08 = parseDouble(rows[26][columnNumber], 27, columnNumber, 0.0, Double.MAX_VALUE);
+		genotypeViability.voracity09 = parseDouble(rows[27][columnNumber], 28, columnNumber, 0.0, Double.MAX_VALUE);
+		genotypeViability.voracity10 = parseDouble(rows[28][columnNumber], 29, columnNumber, 0.0, Double.MAX_VALUE);
 		
 		return genotypeViability;
 	}
@@ -155,5 +175,23 @@ public class Viability {
 
 	public point.components.Viability getViability() {
 		return viability;
+	}
+	
+	
+	public static boolean isKnown(String genotype) {
+		return knownGenotypes.contains(genotype);
+	}
+	
+	public static List<String> getKnownGenotypes() {
+		List<String> knownList = new ArrayList<>(knownGenotypes.size());
+		knownGenotypes.forEach(known -> knownList.add(known));
+		return knownList;
+	}
+	
+	/**
+	 *  JUST FOR UNIT TESTS!! 
+	 */
+	public static Set<String> getKnownGenotypesSet() {
+		return knownGenotypes;
 	}
 }
