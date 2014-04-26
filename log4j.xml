@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration>
+
+  <appender name="ConsoleAppender" class="org.apache.log4j.ConsoleAppender">
+    <param name="target" value="System.out"/>
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%d{ISO8601} [%5p] %m at %l%n"/>
+    </layout>
+    <filter class="org.apache.log4j.varia.LevelRangeFilter">
+      <param name="LevelMin" value="INFO"/>
+    </filter>
+  </appender>
+
+  <appender name="FileAppender" class="org.apache.log4j.DailyRollingFileAppender">
+    <param name="File" value="log/logs" />
+    <param name="immediateFlush" value="true"/>
+  <param name="DatePattern" value="'-'yyyy-MM-dd-HH'.log'" />
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%d{ISO8601} [%5p] %m%n"/>
+    </layout>
+    <filter class="org.apache.log4j.varia.LevelRangeFilter">
+      <param name="LevelMin" value="INFO"/>
+    </filter>
+  </appender>
+
+  <appender name="ErrorsFileAppender" class="org.apache.log4j.DailyRollingFileAppender">
+    <param name="File" value="log/errors" />
+	<param name="DatePattern" value="'-'yyyy-MM-dd-HH'.log'" />
+   <param name="immediateFlush" value="true"/>
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%d{ISO8601} [%5p] %m at %l%n"/>
+    </layout>
+    <filter class="org.apache.log4j.varia.LevelRangeFilter">
+      <param name="LevelMin" value="ERROR"/>
+    </filter>
+  </appender>
+
+  <logger name="HPSLogger">
+    <level value="INFO"/>
+    <appender-ref ref="ErrorsFileAppender"/>
+    <appender-ref ref="FileAppender"/>
+    <appender-ref ref="ConsoleAppender"/>
+  </logger>
+
+</log4j:configuration>
+
+<!--                         PROPERTIES vs XML
+ Properties can be defined by a properties file or by an XML file. Log4j looks for a file named log4j.xml 
+and then for a file named log4j.properties. Both must be placed in the src folder.
+
+The property file is less verbose than an XML file. The XML requires the log4j.dtd to be placed in the 
+source folder as well. The XML requires a dom4j.jar which might not be included in older Java versions.
+
+The properties file does not support some advanced configuration options like Filters, custom 
+ErrorHandlers and a special type of appenders, i.e. AsyncAppender. ErrorHandlers defines how errors in 
+log4j itself are handled, for example badly configured appenders. Filters are more interesting. From 
+the available filters, I think that the level range filter is really missing for property files.
+
+This filter allows to define that a[n] appender should receive log messages from Level INFO to WARN. 
+This allows to split log messages across different logfiles. One for DEBUGGING messages, another for warnings, ...
+
+The property appender only supports a minimum level. If you set it do INFO, you will receive WARN, 
+ERROR and FATAL messages as well. -->
