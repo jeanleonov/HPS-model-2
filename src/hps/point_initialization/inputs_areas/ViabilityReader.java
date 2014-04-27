@@ -17,13 +17,13 @@ import java.util.Set;
 import hps.point.components.GenotypeHelper;
 import hps.point.components.Viability.GenotypeViability;
 
-public class Viability {
+public class ViabilityReader {
 
 	private hps.point.components.Viability viability;
 	public final static String INPUT_AREA = "Viability";
 	private static Set<String> knownGenotypes = new HashSet<>();
 	
-	public Viability(String input) throws InvalidInput {
+	public ViabilityReader(String input) throws InvalidInput {
 		viability = new hps.point.components.Viability();
 		String[][] rows = CSVHelper.getTrimmedTable(input);
 		if (CSVHelper.isInputsEmpty(rows))

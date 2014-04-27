@@ -6,15 +6,14 @@ import hps.exceptions.Exceptions.UnknownHabitat;
 import hps.exceptions.Exceptions.WrongFileStructure;
 
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Set;
 
-public class Neighbors {
+public class NeighborsReader {
 	
-	private Map<String, Double> migrationProbabilities;
-	private final static String INPUT_AREA = "Neighbors";
+	private LinkedHashMap<String, Double> migrationProbabilities;
+	public final static String INPUT_AREA = "Neighbors";
 
-	public Neighbors(String input, Set<String> existingHabitats) throws InvalidInput {
+	public NeighborsReader(String input, Set<String> existingHabitats) throws InvalidInput {
 		migrationProbabilities = new LinkedHashMap<>();
 		String[][] rows = CSVHelper.getTrimmedTable(input);
 		if (CSVHelper.isInputsEmpty(rows))
@@ -41,7 +40,7 @@ public class Neighbors {
 		}
 	}
 	
-	public Map<String, Double> getMigrationProbabilities() {
+	public LinkedHashMap<String, Double> getMigrationProbabilities() {
 		return migrationProbabilities;
 	}
 	

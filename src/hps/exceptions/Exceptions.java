@@ -1,13 +1,15 @@
 package hps.exceptions;
 
 import hps.point.components.GenotypeHelper;
-import hps.point_initialization.inputs_areas.Viability;
+import hps.point_initialization.inputs_areas.ViabilityReader;
+
+import java.io.IOException;
 
 public class Exceptions {
 	
 	private Exceptions() {}
 	
-	public static class InvalidInput extends Exception {
+	public static class InvalidInput extends IOException {
 		private static final long serialVersionUID = 1L;
 		public InvalidInput(String message, String inputArea, int row, int column) {
 			super(String.format("Error in input \"%s\" (row# %d, column# %d):\n%s",
@@ -38,7 +40,7 @@ public class Exceptions {
 	public static class NotAllGenotypes extends InvalidInput {
 		private static final long serialVersionUID = 1L;
 		public NotAllGenotypes() {
-			super("All viability files should contain the same set of genotypes", Viability.INPUT_AREA);
+			super("All viability files should contain the same set of genotypes", ViabilityReader.INPUT_AREA);
 		}
 	}
 	
@@ -152,6 +154,26 @@ public class Exceptions {
 		private static final long serialVersionUID = 1L;
 		public WrongUsageOfDimension(String message, String inputArea) {
 			 super(message, inputArea);
+		}
+	}
+	
+	public static class FolderDoesntExist extends IOException {
+		private static final long serialVersionUID = 1L;
+		public FolderDoesntExist(String folderPath) {
+			super(String.format("Folder \"%s\" doesn't exist", folderPath));
+		}
+		public FolderDoesntExist(String folderPath, String message) {
+			super(String.format("Folder \"%s\" doesn't exist (%s)", folderPath, message));
+		}
+	}
+	
+	public static class FileDoesntExist extends IOException {
+		private static final long serialVersionUID = 1L;
+		public FileDoesntExist(String filePath) {
+			super(String.format("File \"%s\" doesn't exist", filePath));
+		}
+		public FileDoesntExist(String filePath, String message) {
+			super(String.format("File \"%s\" doesn't exist (%s)", filePath, message));
 		}
 	}
 }

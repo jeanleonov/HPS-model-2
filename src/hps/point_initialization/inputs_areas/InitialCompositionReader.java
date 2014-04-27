@@ -4,19 +4,17 @@ import hps.exceptions.Exceptions.InvalidInput;
 import hps.exceptions.Exceptions.NotGenotype;
 import hps.exceptions.Exceptions.NotInteger;
 import hps.exceptions.Exceptions.WrongFileStructure;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import hps.point.components.GenotypeHelper;
 import hps.point.components.IndividualsGroup;
 
-public class InitialComposition {
+import java.util.LinkedHashMap;
 
-	private Map<IndividualsGroup, Integer> composition;
-	private final static String INPUT_AREA = "Initial composition";
+public class InitialCompositionReader {
+
+	private LinkedHashMap<IndividualsGroup, Integer> composition;
+	public final static String INPUT_AREA = "Initial composition";
 	
-	public InitialComposition(String input) throws InvalidInput {
+	public InitialCompositionReader(String input) throws InvalidInput {
 		composition = new LinkedHashMap<>();
 		String[][] rows = CSVHelper.getTrimmedTable(input);
 		if (CSVHelper.isInputsEmpty(rows))
@@ -57,7 +55,7 @@ public class InitialComposition {
 		return new IndividualsGroup(genotype, age);
 	}
 	
-	public Map<IndividualsGroup, Integer> getInitialComposition() {
+	public LinkedHashMap<IndividualsGroup, Integer> getInitialComposition() {
 		return composition;
 	}
 }

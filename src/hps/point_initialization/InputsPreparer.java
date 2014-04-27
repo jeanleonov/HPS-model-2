@@ -10,6 +10,7 @@ import hps.exceptions.Exceptions.WrongFileStructure;
 import hps.exceptions.Exceptions.WrongPointNumber;
 import hps.exceptions.Exceptions.WrongUsageOfDimension;
 import hps.point_initialization.inputs_areas.CSVHelper;
+import hps.tools.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -111,15 +112,22 @@ public class InputsPreparer {
 	
 	public String getPreparedContent(String content, String inputArea) throws InvalidInput {
 		currentInputArea = inputArea;
-		String withComputed = replaceComputed(content);
-		String withEnumerated = replaceEnumerated(withComputed);
-		
+		String withComputed = content;
+		if (content.contains("#["))
+			withComputed = replaceComputed(content);
+		String withEnumerated = withComputed;
+		if (content.contains("#{") || content.contains("{#") || content.contains("#}"))
+			withEnumerated = replaceEnumerated(withComputed);
+		if (withEnumerated.contains("#{") || withEnumerated.contains("{#") || withEnumerated.contains("#}"))
+			Logger.warning("Looks like You want to have changeable values in \"" + currentInputArea+"\". " +
+					   "If it's true You use wrong syntax.");
 		return withEnumerated;
 	}
 	
 	public String replaceComputed(String content) throws InvalidInput {
 		Matcher matcher = Pattern.compile(computedValuesRegex).matcher(content);
 		StringBuilder prepared = new StringBuilder("");
+		boolean hasReplacements = false;
 		while(matcher.find()) {
 			String staticPart = matcher.group("juststatic");
 			String dinamic = "";
@@ -127,9 +135,13 @@ public class InputsPreparer {
 				staticPart = matcher.group("static");
 				String dinamicTemplate = matcher.group("dinamic");
 				dinamic = compileComputedTemplate(dinamicTemplate);
+				hasReplacements = true;
 			}
 			prepared.append(staticPart).append(dinamic);
 		}
+		if (!hasReplacements)
+			Logger.warning("Looks like You want to have changeable values in \"" + currentInputArea+"\". " +
+						   "If it's true You use wrong syntax.");
 		return prepared.toString();
 	}
 	

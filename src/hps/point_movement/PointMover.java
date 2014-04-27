@@ -14,8 +14,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 public class PointMover {
 
@@ -316,7 +314,7 @@ public class PointMover {
 	---  GROWING UP:  -------------------------------------
 	*/
 	private void growingUpPhaseProcessing(Habitat habitat) {
-		SortedMap<IndividualsGroup, IndividualsGroupState> newGroupsStates = new TreeMap<>();
+		LinkedHashMap<IndividualsGroup, IndividualsGroupState> newGroupsStates = new LinkedHashMap<>();
 		for(Entry<IndividualsGroup, IndividualsGroupState> entry : habitat.getGroupsStates().entrySet()) {
 			String genotype = entry.getKey().getGenotype();
 			int newAge = entry.getKey().getAge() + 1;

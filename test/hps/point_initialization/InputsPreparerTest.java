@@ -80,7 +80,7 @@ public class InputsPreparerTest {
 	public void testNominal() throws InvalidInput {
 		InputsPreparer preparer = new InputsPreparer("dim1;integer;25\ndim2;float;4\ndim3;enumeration;3");
 		preparer.setPoint(1);
-		String content = preparer.getPreparedContent("Trololo #[dim2:12.3-54] helolo", "Some area");
+		String content = preparer.getPreparedContent("Trololo #[dim2:12.3-54] helolo #{dim]{##}{##}", "Some area");
 		Assert.assertEquals("Trololo 12.3 helolo", content);
 		preparer.setPoint(300);
 		content = preparer.getPreparedContent("Trololo #{dim3}{#value1#}{#value2#}{#value3#} helolo #[dim1:10-100]", "Some area");

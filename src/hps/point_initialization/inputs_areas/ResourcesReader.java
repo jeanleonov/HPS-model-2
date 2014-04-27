@@ -3,12 +3,12 @@ package hps.point_initialization.inputs_areas;
 import hps.exceptions.Exceptions.InvalidInput;
 import hps.exceptions.Exceptions.NotDouble;
 
-public class Resources {
+public class ResourcesReader {
 
 	private double resources;
-	private final static String INPUT_AREA = "Resources";
+	public final static String INPUT_AREA = "Resources";
 	
-	public Resources(String input) throws InvalidInput {
+	public ResourcesReader(String input) throws InvalidInput {
 		String[][] rows = CSVHelper.getTrimmedTable(input);
 		if (CSVHelper.isInputsEmpty(rows))
 			resources = 0;

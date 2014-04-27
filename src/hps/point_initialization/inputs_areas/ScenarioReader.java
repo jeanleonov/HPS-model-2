@@ -15,10 +15,10 @@ import java.util.Map;
 import hps.point.components.GenotypeHelper;
 import hps.point.components.IndividualsGroup;
 
-public class Scenario {
+public class ScenarioReader {
 
 	private hps.point.components.Scenario scenario;
-	private final static String INPUT_AREA = "Scenario";
+	public final static String INPUT_AREA = "Scenario";
 	
 	private final static String PLUS_COLUMN_NAME_PATTER = "(?i)Resource *\\+";
 	private final static String MULTIPLICATE_COLUMN_NAME_PATTER = "(?i)Resource *\\*";
@@ -30,7 +30,7 @@ public class Scenario {
 	
 	private List<IndividualsGroup> immigratedGroups;
 	
-	public Scenario(String input) throws InvalidInput {
+	public ScenarioReader(String input) throws InvalidInput {
 		immigratedGroups = new LinkedList<>();
 		scenario = new hps.point.components.Scenario();
 		String[][] rows = CSVHelper.getTrimmedTable(input);

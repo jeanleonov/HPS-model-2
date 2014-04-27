@@ -1,12 +1,12 @@
 package hps.point.components;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.SortedMap;
 
 public class Habitat {
 	
 	private String habitatName;
-	private SortedMap<IndividualsGroup, IndividualsGroupState> groupsStates;
+	private LinkedHashMap<IndividualsGroup, IndividualsGroupState> groupsStates;
 	private Viability viability;
 	private Posterity posterity;
 	private Scenario scenario;
@@ -15,7 +15,7 @@ public class Habitat {
 	
 	public final static String EXTERNAL_WORLD = "-";
 	
-	public Habitat(SortedMap<IndividualsGroup, IndividualsGroupState> groupsStates,
+	public Habitat(LinkedHashMap<IndividualsGroup, IndividualsGroupState> groupsStates,
 			       Viability viability, Posterity posterity, Scenario scenario,
 			       Map<String, Double> migrationProbabilities, double resources,
 			       String habitatName) {
@@ -45,11 +45,11 @@ public class Habitat {
 		return migrationProbabilities;
 	}
 	
-	public SortedMap<IndividualsGroup, IndividualsGroupState> getGroupsStates() {
+	public LinkedHashMap<IndividualsGroup, IndividualsGroupState> getGroupsStates() {
 		return groupsStates;
 	}
 	
-	public void setGroupsStates(SortedMap<IndividualsGroup, IndividualsGroupState> map) {
+	public void setGroupsStates(LinkedHashMap<IndividualsGroup, IndividualsGroupState> map) {
 		groupsStates = map;
 	}
 

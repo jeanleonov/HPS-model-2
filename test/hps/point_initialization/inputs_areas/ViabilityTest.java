@@ -9,7 +9,7 @@ import hps.exceptions.Exceptions.NotInRange;
 import hps.exceptions.Exceptions.NotInteger;
 import hps.exceptions.Exceptions.WrongFileStructure;
 import hps.point_initialization.inputs_areas.CSVHelper;
-import hps.point_initialization.inputs_areas.Viability;
+import hps.point_initialization.inputs_areas.ViabilityReader;
 
 import org.junit.After;
 import org.junit.Before;
@@ -56,30 +56,30 @@ public class ViabilityTest {
 	
 	@After
 	public void tearDownAfter() throws Exception {
-		Viability.getKnownGenotypesSet().clear();
+		ViabilityReader.getKnownGenotypesSet().clear();
 	}
 
 	@Test(expected = WrongFileStructure.class)
 	public void testWrongFileStructure() throws InvalidInput {
 		rows[6] = new String[7];
 		String input = getInput(rows);
-		new Viability(input);
+		new ViabilityReader(input);
 	}
 
 	@Test(expected = NotGenotype.class)
 	public void testNotGenotype() throws InvalidInput {
 		rows[0][1] = "xR(xr(";
 		String input = getInput(rows);
-		new Viability(input);
+		new ViabilityReader(input);
 	}
 
 	@Test(expected = NotGenotype.class)
 	public void testUnknownGenotype() throws InvalidInput {
 		String input = getInput(rows);
-		new Viability(input);
+		new ViabilityReader(input);
 		rows[0][1] = "xRxR";
 		input = getInput(rows);
-		new Viability(input);
+		new ViabilityReader(input);
 	}
 
 	@Test(expected = NotAllGenotypes.class)
@@ -114,37 +114,37 @@ public class ViabilityTest {
 		"Потребность в ресурсах;28;21;21\n" +
 		"Потребность в ресурсах;28;21;21;\n" +
 		"Потребность в ресурсах;28;21;21;\n";
-		new Viability(input);
+		new ViabilityReader(input);
 		input = getInput(rows);
-		new Viability(input);
+		new ViabilityReader(input);
 	}
 
 	@Test(expected = NotDouble.class)
 	public void testNotDouble() throws InvalidInput {
 		rows[20][1] = "notDouble";
 		String input = getInput(rows);
-		new Viability(input);
+		new ViabilityReader(input);
 	}
 
 	@Test(expected = NotInteger.class)
 	public void testInteger() throws InvalidInput {
 		rows[1][1] = "notInteger";
 		String input = getInput(rows);
-		new Viability(input);
+		new ViabilityReader(input);
 	}
 
 	@Test(expected = Negative.class)
 	public void testNegative() throws InvalidInput {
 		rows[1][1] = "-17";
 		String input = getInput(rows);
-		new Viability(input);
+		new ViabilityReader(input);
 	}
 
 	@Test(expected = NotInRange.class)
 	public void testNotInRange() throws InvalidInput {
 		rows[3][1] = "1.5";
 		String input = getInput(rows);
-		new Viability(input);
+		new ViabilityReader(input);
 	}
 	
 	private String getInput(String[][] rows) {

@@ -7,7 +7,7 @@ public class GenotypeHelper {
 	private static final String PATTERN = "(([xXyY][a-zA-Z])|(\\([xXyY][a-zA-Z]\\)))*|(([a-zA-Z][xXyY])|(\\([a-zA-Z][xXyY]\\)))*";
 	
 	public static boolean isGenotype(String genotype) {
-		return genotype.matches(PATTERN) && hps.point_initialization.inputs_areas.Viability.isKnown(genotype);
+		return genotype.matches(PATTERN) && hps.point_initialization.inputs_areas.ViabilityReader.isKnown(genotype);
 	}
 	
 	public static boolean isLookedAsGenotype(String genotype) {

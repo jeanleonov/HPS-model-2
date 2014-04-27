@@ -11,12 +11,12 @@ import java.util.Map;
 
 import hps.point.components.GenotypeHelper;
 
-public class Posterity {
+public class PosterityReader {
 
 	private hps.point.components.Posterity posterity;
-	private final static String INPUT_AREA = "Posterity";
+	public final static String INPUT_AREA = "Posterity";
 	
-	public Posterity(String input) throws InvalidInput {
+	public PosterityReader(String input) throws InvalidInput {
 		posterity = new hps.point.components.Posterity();
 		String[][] rows = CSVHelper.getTrimmedTable(input);
 		if (CSVHelper.isInputsEmpty(rows))
