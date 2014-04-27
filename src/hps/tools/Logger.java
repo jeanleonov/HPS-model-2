@@ -81,7 +81,7 @@ public class Logger {
 		"</appender>" +
 	
 		"<appender name=\"FileAppender\" class=\"org.apache.log4j.DailyRollingFileAppender\">" +
-			"<param name=\"File\" value=\"log/logs\" />" +
+			"<param name=\"File\" value=\""+CMDArgument.LOGS_FOLDER+"/logs\" />" +
 			"<param name=\"immediateFlush\" value=\"true\"/>" +
 			"<param name=\"DatePattern\" value=\"'-'yyyy-MM-dd-HH'.log'\" />" +
 			"<layout class=\"org.apache.log4j.PatternLayout\">" +
