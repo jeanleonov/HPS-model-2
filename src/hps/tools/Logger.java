@@ -1,6 +1,7 @@
 package hps.tools;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -81,7 +82,7 @@ public class Logger {
 		"</appender>" +
 	
 		"<appender name=\"FileAppender\" class=\"org.apache.log4j.DailyRollingFileAppender\">" +
-			"<param name=\"File\" value=\""+CMDArgument.LOGS_FOLDER+"/logs\" />" +
+			"<param name=\"File\" value=\""+(String)CMDArgument.LOGS_FOLDER.getValue()+"/logs\" />" +
 			"<param name=\"immediateFlush\" value=\"true\"/>" +
 			"<param name=\"DatePattern\" value=\"'-'yyyy-MM-dd-HH'.log'\" />" +
 			"<layout class=\"org.apache.log4j.PatternLayout\">" +
@@ -114,6 +115,13 @@ public class Logger {
 	"</log4j:configuration>";
 	
 	static {
+		try {
+			File logsFolder = new File((String)CMDArgument.LOGS_FOLDER.getValue());
+			if (!logsFolder.exists() || !logsFolder.isDirectory())
+				logsFolder.createNewFile();
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
 		Element node = null;
 		try {
 			node = DocumentBuilderFactory
@@ -124,7 +132,6 @@ public class Logger {
 		} catch (SAXException | IOException | ParserConfigurationException e) {
 			// This situation is impossible
 			e.printStackTrace();
-			throw new Error("Cannot configurate logger");
 		}
 		DOMConfigurator.configure(node);
 	}

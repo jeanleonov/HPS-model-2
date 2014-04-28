@@ -5,6 +5,8 @@ import java.text.ParseException;
 import java.util.Hashtable;
 import java.util.Vector;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Largely GNU-compatible command-line options parser. Has short (-v) and
@@ -264,6 +266,35 @@ public class CMDLineParser {
                 return arg;
             }
         }
+
+        /**
+         * An option that expects a range value
+         */
+        public static class RangeOption extends Option {
+    		private static final Pattern PATTERN = Pattern.compile("(:?(?<left>\\d+)\\.\\.(?<right>\\d+))|(?<single>\\d+)");
+            public RangeOption( char shortForm, String longForm ) {
+                super(shortForm, longForm, true);
+            }
+            public RangeOption( String longForm ) {
+                super(longForm, true);
+            }
+            protected Object parseValue( String arg, Locale locale )
+                    throws IllegalOptionValueException {
+            	Matcher matcher = PATTERN.matcher(arg);
+            	if (!matcher.find())
+                    throw new IllegalOptionValueException(this, arg);
+            	String left = matcher.group("left");
+            	String right = matcher.group("right");
+            	String single = matcher.group("single");
+            	try {
+	            	if (single != null)
+	            		return new Range(Integer.parseInt(single));
+	            	return new Range(Integer.parseInt(left),Integer.parseInt(right));
+            	} catch(Exception e) {
+                    throw new IllegalOptionValueException(this, arg);
+            	}
+            }
+        }
     }
 
     /**
@@ -354,6 +385,22 @@ public class CMDLineParser {
      */
     public final Option addBooleanOption( String longForm ) {
         return addOption(new Option.BooleanOption(longForm));
+    }
+
+    /**
+     * Convenience method for adding a boolean option.
+     * @return the new Option
+     */
+    public final Option addRangeOption( char shortForm, String longForm ) {
+        return addOption(new Option.RangeOption(shortForm, longForm));
+    }
+
+    /**
+     * Convenience method for adding a boolean option.
+     * @return the new Option
+     */
+    public final Option addRangeOption( String longForm ) {
+        return addOption(new Option.RangeOption(longForm));
     }
 
     /**

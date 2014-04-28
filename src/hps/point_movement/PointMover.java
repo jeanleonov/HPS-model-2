@@ -5,6 +5,7 @@ import hps.point.components.Habitat;
 import hps.point.components.IndividualsGroup;
 import hps.point.components.IndividualsGroupState;
 import hps.statistic_saving.StatisticSubcriber;
+import hps.tools.CMDArgument;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -44,18 +45,16 @@ public class PointMover {
 		return currentPoint;
 	}
 	
-	public int getYear() {
-		return year;
-	}
-	
 	private void notifySubscribers(IterationSubStep justFinishedSubStep) {
 		subscribers.stream().forEach(subscriber -> subscriber.saveSystemState(currentPoint, year, justFinishedSubStep));
 	}
 	
 	
-	public void nextYear() {
-		currentPoint.getHabitats().stream().forEach(habitat -> nextYearIn(habitat));
-		year++;
+	public void move() {
+		for (int i=1; i<=(Integer)CMDArgument.YEARS.getValue(); i++) {
+			currentPoint.getHabitats().stream().forEach(habitat -> nextYearIn(habitat));
+			year++;
+		}
 	}
 	
 	private void nextYearIn(Habitat habitat) {

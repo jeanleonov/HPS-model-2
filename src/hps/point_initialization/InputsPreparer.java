@@ -105,7 +105,7 @@ public class InputsPreparer {
 		int result = 1;
 		for (Integer steps : totalSteps)
 			result *= steps;
-		return result-1;
+		return result;
 	}
 	
 	private String currentInputArea;

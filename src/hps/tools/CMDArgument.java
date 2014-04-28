@@ -13,8 +13,8 @@ public enum CMDArgument {
 
 	HELP ("help", Boolean.FALSE, Boolean.class),
 	YEARS ('y',"years", new Integer(1), Integer.class),
-	NUMBER_OF_EXPERIMENTS ('e', "experiments", "1", String.class),
-	POINT_NUMBER('p', "points", "1", String.class),
+	EXPERIMENTS ('e', "experiments", new Range(1), Range.class),
+	POINTS('p', "points", new Range(1), Range.class),
 	STATISTIC ("statistic", "ages with_immatures after_each", String.class),
 	EXPERIMENTS_SERIES_NAME ("name", "modeling", String.class),
 	INPUTS_FOLDER("inputs_folder", "inputs", String.class),
@@ -36,13 +36,13 @@ public enum CMDArgument {
 				"			-y 200\n" +
 				"			--years 200\n\n" +
 
-				"	[{-e, --experiments} string]  range of simulated experiments | DEFAULT \"1\"\n" + 
+				"	[{-e, --experiments} range]  range of simulated experiments | DEFAULT \"1\"\n" + 
 				"			Examples:\n" +
 				"			-e 1..100  (1st, 2nd, ... , 100th experiments will be modelled)\n" +
 				"			-e 55      (55th experiment will be modelled)\n" +
 				"			--experiments 1..100\n\n" +
 
-				"	[{-p, --points} string]  range of point to test | DEFAULT \"1\"\n" + 
+				"	[{-p, --points} range]  range of point to test | DEFAULT \"1\"\n" + 
 				"			Examples:\n" +
 				"			-p 17     (17th point will be tested)\n" +
 				"			-p 1..81  (1st, 2nd, ... , 81st points will be tested)\n" +
@@ -144,6 +144,8 @@ public enum CMDArgument {
 			return CMDLineParser.class.getMethod("addDoubleOption", String.class);
 		if (valueClass.equals(String.class))
 			return CMDLineParser.class.getMethod("addStringOption", String.class);
+		if (valueClass.equals(Range.class))
+			return CMDLineParser.class.getMethod("addRangeOption", String.class);
 		return null;
 	}
 	
@@ -156,6 +158,8 @@ public enum CMDArgument {
 			return CMDLineParser.class.getMethod("addDoubleOption", char.class, String.class);
 		if (valueClass.equals(String.class))
 			return CMDLineParser.class.getMethod("addStringOption", char.class, String.class);
+		if (valueClass.equals(Range.class))
+			return CMDLineParser.class.getMethod("addRangeOption", char.class, String.class);
 		return null;
 	}
 	
