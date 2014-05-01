@@ -27,37 +27,52 @@ public class PointMover {
 	MAX_NUMBER_OF_REPRODUCTION_CIRCLES = 10;
 	
 	public enum IterationSubStep {
-		REPRODUCTION,
-		COMPETITION,
-		DIEING,
-		MOVEMENT,
-		GROWING_UP
+		REPRODUCTION("Reproduction"),
+		COMPETITION("Competition"),
+		DIEING("Dieing"),
+		MOVEMENT("Movement"),
+		GROWING_UP("Growing up");
+		private String name;
+		private IterationSubStep(String name) {
+			this.name = name;
+		}
+		@Override
+		public String toString() {
+			return name;
+		}
 	}
 	
 	private Random rand = new Random();
 	
 	public PointMover(Point firstPoint) {
-		currentPoint = firstPoint;
-		year = 0;
+		currentPoint = new Point(firstPoint);
+		year = 1;
+		subscribers = new LinkedList<>();
 	}
 	
 	public Point getCurrentPoint() {
 		return currentPoint;
 	}
 	
-	private void notifySubscribers(IterationSubStep justFinishedSubStep) {
-		subscribers.stream().forEach(subscriber -> subscriber.saveSystemState(currentPoint, year, justFinishedSubStep));
+	private void notifySubscribers(IterationSubStep justFinishedSubStep) throws Throwable {
+		for (StatisticSubcriber subscriber : subscribers)
+			subscriber.saveSystemState(currentPoint, year, justFinishedSubStep);
+	}
+	
+	public void registerSubscriber(StatisticSubcriber subscriber) {
+		subscribers.add(subscriber);
 	}
 	
 	
-	public void move() {
+	public void move() throws Throwable {
 		for (int i=1; i<=(Integer)CMDArgument.YEARS.getValue(); i++) {
-			currentPoint.getHabitats().stream().forEach(habitat -> nextYearIn(habitat));
+			for (Habitat habitat : currentPoint.getHabitats())
+				nextYearIn(habitat);
 			year++;
 		}
 	}
 	
-	private void nextYearIn(Habitat habitat) {
+	private void nextYearIn(Habitat habitat) throws Throwable {
 		reproductionPhaseProcessing(habitat);
 		competitionPhaseProcessing(habitat);
 		diePhaseProcessing(habitat);
@@ -75,21 +90,42 @@ public class PointMover {
 	private List<IndividualsGroupState> lonelyFemales = new ArrayList<>();
 	
 	private IndividualsGroupState[] availableFemales = new IndividualsGroupState[MAX_SIZE_OF_FEMALES_LIST];
+	private int numberOfAvailableFemales;
 	private double totalAttractivenessOfAvailable;
 	
-	private class ApplicationPack {
+	private static class ApplicationPack {
 		List<IndividualsGroupState> malesGroups;
 		double totalAttractivenessOfCandidates;
 	}
 	
+	private static class Female {
+		IndividualsGroupState femalesGroup;
+		int femaleNumber;
+		Female(IndividualsGroupState group, int number) {
+			femalesGroup = group;
+			femaleNumber = number;
+		}
+		@Override
+		public int hashCode() {
+			return femalesGroup.hashCode() + femaleNumber*20;
+		}
+		@Override
+		public boolean equals(Object arg0) {
+			Female other = (Female)arg0;
+			return other.femalesGroup.equals(this.femalesGroup) && femaleNumber==other.femaleNumber;
+		}
+	}
 	
-	private void reproductionPhaseProcessing(Habitat habitat) {
+	
+	private void reproductionPhaseProcessing(Habitat habitat) throws Throwable {
 		initiateMultipliedst(habitat);
 		for (int i=0; i<MAX_NUMBER_OF_REPRODUCTION_CIRCLES; i++) {
 			initiateMalesAndFemales(habitat);
-			Map<IndividualsGroupState, ApplicationPack> applicationsForFemales;
+			if (males.size()==0 || numberOfLonelyFemales==0)
+				continue;
+			Map<Female, ApplicationPack> applicationsForFemales;
 			applicationsForFemales = determineFemalesPopularity();
-			for (Entry<IndividualsGroupState, ApplicationPack> entry : applicationsForFemales.entrySet()) {
+			for (Entry<Female, ApplicationPack> entry : applicationsForFemales.entrySet()) {
 				double point = (double) Math.random() * entry.getValue().totalAttractivenessOfCandidates;
 				double currentSum = 0.0;
 				int j;
@@ -98,7 +134,7 @@ public class PointMover {
 					if (point <= currentSum)
 						break;
 				}
-				createPosterity(entry.getKey(), entry.getValue().malesGroups.get(j), habitat);
+				createPosterity(entry.getKey().femalesGroup, entry.getValue().malesGroups.get(j), habitat);
 			}
 		}
 		notifySubscribers(IterationSubStep.REPRODUCTION);
@@ -114,20 +150,20 @@ public class PointMover {
 		males.clear();
 		lonelyFemales.clear();
 		for(IndividualsGroupState group : habitat.getGroupsStates().values()) {
-			if (group.isMatureMale())
+			if (group.isMatureMale() && group.strength>0)
 				males.add(group);
-			else if (group.isMatureFemale()) {
+			else if (group.isMatureFemale() && group.getNotMultipliedst()>0) {
 				lonelyFemales.add(group);
 				numberOfLonelyFemales += group.getNotMultipliedst();
 			}
 		}
 	}
 	
-	private Map<IndividualsGroupState, ApplicationPack> determineFemalesPopularity() {
-		Map<IndividualsGroupState, ApplicationPack> applicationsForFemales = new LinkedHashMap<>();
+	private Map<Female, ApplicationPack> determineFemalesPopularity() {
+		Map<Female, ApplicationPack> applicationsForFemales = new LinkedHashMap<>();
 		for (IndividualsGroupState maleGroup : males) {
 			for (int i=0; i<maleGroup.multipliedst; i++)
-				if (Math.random() >= maleGroup.getAmplexusRepeat())
+				if (Math.random() <= maleGroup.getAmplexusRepeat())
 					chooseFemaleFor(maleGroup, applicationsForFemales);
 			for (int i=0; i<maleGroup.strength-maleGroup.multipliedst; i++)
 				chooseFemaleFor(maleGroup, applicationsForFemales);
@@ -136,9 +172,13 @@ public class PointMover {
 	}
 	
 	private void chooseFemaleFor(IndividualsGroupState maleGroup,
-								 Map<IndividualsGroupState, ApplicationPack> applicationsForFemales) {
+								 Map<Female, ApplicationPack> applicationsForFemales) {
 		fillAvailableFemales();
-		IndividualsGroupState chosen = chooseFemaleFromAvailable();
+		if (numberOfAvailableFemales == 0)
+			return;
+		Female chosen = chooseFemaleFromAvailable();
+		if (chosen == null)
+			return;
 		ApplicationPack applicationsPack = applicationsForFemales.get(chosen);
 		if (applicationsPack == null) {
 			applicationsPack = new ApplicationPack();
@@ -152,8 +192,8 @@ public class PointMover {
 	
 	private void fillAvailableFemales() {
 		totalAttractivenessOfAvailable = 0.0;
-		int numberOfFemales = Math.abs(rand.nextInt()%(MAX_SIZE_OF_FEMALES_LIST+1));
-		for (int i=0, j; i<numberOfFemales; i++) {
+		numberOfAvailableFemales = Math.abs(rand.nextInt()%(MAX_SIZE_OF_FEMALES_LIST+1));
+		for (int i=0, j; i<numberOfAvailableFemales; i++) {
 			double point = (double) Math.random() * numberOfLonelyFemales;
 			double currentSum = 0.0;
 			for (j=0; i<lonelyFemales.size(); j++) {
@@ -164,20 +204,24 @@ public class PointMover {
 			availableFemales[i] = lonelyFemales.get(j);
 			totalAttractivenessOfAvailable += availableFemales[i].getReproduction();
 		}
-		for (int i=numberOfFemales; i<availableFemales.length; i++)
+		for (int i=numberOfAvailableFemales; i<availableFemales.length; i++)
 			availableFemales[i] = null;
 	}
 	
-	private IndividualsGroupState chooseFemaleFromAvailable() {
+	private Female chooseFemaleFromAvailable() {
 		double point = (double) Math.random() * totalAttractivenessOfAvailable;
 		double currentSum = 0.0;
 		int i;
-		for (i=0; i<availableFemales.length && availableFemales[i]!=null; i++) {
+		for (i=0; i<numberOfAvailableFemales; i++) {
 			currentSum += availableFemales[i].getReproduction();
 			if (point <= currentSum)
 				break;
 		}
-		return availableFemales[i];
+		IndividualsGroupState femalesGroup = availableFemales[i]; 
+		int possibleFemalesInGroup = femalesGroup.strength - femalesGroup.multipliedst;
+		if (possibleFemalesInGroup == 0)
+			return null;
+		return new Female(femalesGroup, rand.nextInt(possibleFemalesInGroup));
 	}
 	
 	private void createPosterity(IndividualsGroupState mother,
@@ -188,25 +232,30 @@ public class PointMover {
 			return;
 		for (Entry<String,Double> entry : posterityComposition.entrySet()) {
 			int born = (int) (father.getFertility() * mother.getFertility() * entry.getValue());
-			IndividualsGroup childsGroup = new IndividualsGroup(entry.getKey(), 0);
-			habitat.getState(childsGroup).strength += born;
+			if (born > 0) {
+				IndividualsGroup childsGroup = new IndividualsGroup(entry.getKey(), 0);
+				habitat.getState(childsGroup).strength += born;
+			}
 		}
+		father.multipliedst += 1;
+		mother.multipliedst += 1;
 	}
 
 	/*
 	=======================================================
 	---  COMPETITION:  ------------------------------------
 	*/
-	private void competitionPhaseProcessing(Habitat habitat) {
+	private void competitionPhaseProcessing(Habitat habitat) throws Throwable {
 		changeHabitatResources(habitat);
 		simulateCompetition(habitat);
+		notifySubscribers(IterationSubStep.COMPETITION);
 	}
 	
 	private void changeHabitatResources(Habitat habitat) {
 		habitat.setResources(habitat.getScenario().getResources(year, habitat.getResources()));
 	}
 	
-	private void simulateCompetition(Habitat habitat) {
+	private void simulateCompetition(Habitat habitat) throws Throwable {
 		double totalSumOfAntiCompetetiveness = 0;
 		double totalSumOfVoracity = 0;
 		double weightedTotalSumOfVoracity = 0;
@@ -228,22 +277,21 @@ public class PointMover {
 		for(IndividualsGroupState group : habitat.getGroupsStates().values()) {
 			int dead = 0;
 			for(int i=0; i<group.strength; i++)
-				if (Math.random() <= 1.0 - group.getCompetitiveness()/coeficient)
+				if (Math.random() > group.getCompetitiveness()/coeficient)
 					dead++;
 			group.strength -= dead;
 		}
-		notifySubscribers(IterationSubStep.COMPETITION);
 	}
 	
 	/*
 	=======================================================
 	---  DIEING:  -----------------------------------------
 	*/
-	private void diePhaseProcessing(Habitat habitat) {
+	private void diePhaseProcessing(Habitat habitat) throws Throwable {
 		for(IndividualsGroupState group : habitat.getGroupsStates().values()) {
 			int dead = 0;
 			for(int i=0; i<group.strength; i++)
-				if(Math.random() <= group.getSurvival())
+				if(Math.random() > group.getSurvival())
 					dead++;
 			group.strength -= dead;
 		}
@@ -254,18 +302,20 @@ public class PointMover {
 	=======================================================
 	---  MOVEMENT:  ---------------------------------------
 	*/
-	private void movementPhaseProcessing(Habitat habitat) {
+	private void movementPhaseProcessing(Habitat habitat) throws Throwable {
 		immigration(habitat);
 		innerMigrationAndEmigration(habitat);
 	}
 	
 	private void immigration(Habitat habitat) {
 		Map<IndividualsGroup, Integer> immigration = habitat.getScenario().getImmigration(year);
+		if (immigration == null)
+			return;
 		for(Entry<IndividualsGroup, Integer> entry : immigration.entrySet())
 			habitat.getState(entry.getKey()).strength += entry.getValue();
 	}
 	
-	private void innerMigrationAndEmigration(Habitat habitat) {
+	private void innerMigrationAndEmigration(Habitat habitat) throws Throwable {
 		Map<String, Double> migrationProbabilities = habitat.getMigrationProbabilities();
 		double totalVoracity = getTotalVoracity(habitat);
 		Set<Entry<String, Double>> entries = migrationProbabilities.entrySet();
@@ -311,16 +361,26 @@ public class PointMover {
 	/*
 	=======================================================
 	---  GROWING UP:  -------------------------------------
-	*/
-	private void growingUpPhaseProcessing(Habitat habitat) {
-		LinkedHashMap<IndividualsGroup, IndividualsGroupState> newGroupsStates = new LinkedHashMap<>();
+	*/	
+	private void growingUpPhaseProcessing(Habitat habitat) throws Throwable {
+		LinkedList<IndividualsGroupState> newGroups = new LinkedList<>();
 		for(Entry<IndividualsGroup, IndividualsGroupState> entry : habitat.getGroupsStates().entrySet()) {
 			String genotype = entry.getKey().getGenotype();
 			int newAge = entry.getKey().getAge() + 1;
 			IndividualsGroup growedGroup = new IndividualsGroup(genotype, newAge);
-			newGroupsStates.put(growedGroup, entry.getValue());
+			IndividualsGroupState groupState = habitat.getGroupsStates().get(growedGroup);
+			if (groupState == null)
+				newGroups.add(new IndividualsGroupState(growedGroup, entry.getValue().strength,
+														habitat.getViability(), habitat.getPosterity()));
+			else
+				groupState.strengthOfYoungers = entry.getValue().strength;
 		}
-		habitat.setGroupsStates(newGroupsStates);
+		for(Entry<IndividualsGroup, IndividualsGroupState> entry : habitat.getGroupsStates().entrySet()) {
+			entry.getValue().strength = entry.getValue().strengthOfYoungers;
+			entry.getValue().strengthOfYoungers = 0;
+		}
+		for(IndividualsGroupState group : newGroups)
+			habitat.getGroupsStates().put(group.getGroup(), group);
 		notifySubscribers(IterationSubStep.GROWING_UP);
 	}
 }

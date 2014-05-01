@@ -1,37 +1,46 @@
 package hps.statistic_saving;
 
+import hps.program_starter.HPS;
 import hps.tools.CMDArgument;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 public class InitialPointSaver {
 	
 	private File targetFolder;
-	private ZipOutputStream zippedPointInfo;
 
 	public InitialPointSaver() throws IOException {
 		targetFolder = new File((String)CMDArgument.SETTINGS_FOLDER.getValue());
 		if (!targetFolder.exists() || !targetFolder.isDirectory())
-			targetFolder.createNewFile();
-	}
-	
-	public void openPoint(String pointNumber) throws IOException {
-		FileOutputStream fout = new FileOutputStream(targetFolder.getPath() + File.separator + pointNumber);
-		zippedPointInfo = new ZipOutputStream(fout);
+			targetFolder.mkdirs();
 	}
 	
 	public void save(String fileName, String fileContent) throws IOException {
-		zippedPointInfo.putNextEntry(new ZipEntry(fileName));
-		zippedPointInfo.write(fileContent.getBytes());
-		zippedPointInfo.closeEntry();
+		File file = new File(String.format("%s/%s", targetFolder.getPath(), fileName));
+		file.createNewFile();
+		FileOutputStream fout = new FileOutputStream(file);
+		BufferedOutputStream bfout = new BufferedOutputStream(fout);
+		bfout.write(fileContent.getBytes());
+		bfout.flush();
+		bfout.close();
 	}
 	
-	public void closePoint() throws IOException {
-		zippedPointInfo.flush();
-		zippedPointInfo.close();
+	public void saveForCurrentPoint(String habitat, String fileName, String fileContent) throws IOException {
+		File pointFolder = new File(String.format("%s/%s/%s",
+				targetFolder.getPath(),
+				HPS.get().getCurrentPointName(),
+				habitat));
+		if (!pointFolder.exists())
+			pointFolder.mkdirs();
+		File file = new File(String.format("%s/%s", pointFolder.getPath(), fileName));
+		file.createNewFile();
+		FileOutputStream fout = new FileOutputStream(file);
+		BufferedOutputStream bfout = new BufferedOutputStream(fout);
+		bfout.write(fileContent.getBytes());
+		bfout.flush();
+		bfout.close();
 	}
 }

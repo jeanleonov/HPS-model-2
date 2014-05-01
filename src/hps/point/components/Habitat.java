@@ -2,6 +2,7 @@ package hps.point.components;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class Habitat {
 	
@@ -26,6 +27,20 @@ public class Habitat {
 		this.migrationProbabilities = migrationProbabilities;
 		this.resources = resources;
 		this.habitatName = habitatName;
+	}
+	
+	public Habitat(Habitat habitat) {
+		groupsStates = new LinkedHashMap<>();
+		for (Entry<IndividualsGroup, IndividualsGroupState> entry : habitat.getGroupsStates().entrySet()) {
+			IndividualsGroupState groupState = new IndividualsGroupState(entry.getValue());
+			groupsStates.put(entry.getKey(), groupState);
+		}
+		this.viability = habitat.viability;
+		this.posterity = habitat.posterity;
+		this.scenario = habitat.scenario;
+		this.migrationProbabilities = habitat.migrationProbabilities;
+		this.resources = habitat.resources;
+		this.habitatName = habitat.habitatName;
 	}
 
 	public IndividualsGroupState getState(IndividualsGroup group) {
@@ -63,5 +78,13 @@ public class Habitat {
 
 	public String getHabitatName() {
 		return habitatName;
+	}
+
+	public Viability getViability() {
+		return viability;
+	}
+
+	public Posterity getPosterity() {
+		return posterity;
 	}
 }

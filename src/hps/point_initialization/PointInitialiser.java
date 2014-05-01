@@ -108,7 +108,7 @@ public class PointInitialiser {
 									  "but file with parameters of viability is strongly required");
 		String fileContent = getFullFileContent(viabilityCSV);
 		String preparedContent = preparer.getPreparedContent(fileContent, ViabilityReader.INPUT_AREA);
-		saver.save(habitatFolder.getName() + File.separatorChar + VIABILITY, preparedContent);
+		saver.saveForCurrentPoint(habitatFolder.getName(), VIABILITY, preparedContent);
 		return new ViabilityReader(preparedContent).getViability();
 	}
 	
@@ -119,7 +119,7 @@ public class PointInitialiser {
 									  "but file with parameters of reproduction is strongly required");
 		String fileContent = getFullFileContent(posterityCSV);
 		String preparedContent = preparer.getPreparedContent(fileContent, PosterityReader.INPUT_AREA);
-		saver.save(habitatFolder.getName() + File.separatorChar + POSTERITY, preparedContent);
+		saver.saveForCurrentPoint(habitatFolder.getName(), POSTERITY, preparedContent);
 		return new PosterityReader(preparedContent).getPosterity();
 	}
 	
@@ -131,7 +131,7 @@ public class PointInitialiser {
 		else
 			fileContent = getFullFileContent(scenarioCSV);
 		String preparedContent = preparer.getPreparedContent(fileContent, ScenarioReader.INPUT_AREA);
-		saver.save(habitatFolder.getName() + File.separatorChar + SCENARIO, preparedContent);
+		saver.saveForCurrentPoint(habitatFolder.getName(), SCENARIO, preparedContent);
 		return new ScenarioReader(preparedContent).getScenario();
 	}
 
@@ -142,7 +142,7 @@ public class PointInitialiser {
 									  "but file with initial resources of habitat is strongly required");
 		String fileContent = getFullFileContent(resourcesCSV);
 		String preparedContent = preparer.getPreparedContent(fileContent, ResourcesReader.INPUT_AREA);
-		saver.save(habitatFolder.getName() + File.separatorChar + RESOURCES, preparedContent);
+		saver.saveForCurrentPoint(habitatFolder.getName(), RESOURCES, preparedContent);
 		return new ResourcesReader(preparedContent).getResources();
 	}
 	
@@ -154,7 +154,7 @@ public class PointInitialiser {
 		else
 			fileContent = getFullFileContent(neighborsCSV);
 		String preparedContent = preparer.getPreparedContent(fileContent, NeighborsReader.INPUT_AREA);
-		saver.save(habitatFolder.getName() + File.separatorChar + NEIGHBORS, preparedContent);
+		saver.saveForCurrentPoint(habitatFolder.getName(), NEIGHBORS, preparedContent);
 		return new NeighborsReader(preparedContent, existingHabitats).getMigrationProbabilities();
 		
 	}
@@ -168,7 +168,7 @@ public class PointInitialiser {
 		else
 			fileContent = getFullFileContent(initialCompositionCSV);
 		String preparedContent = preparer.getPreparedContent(fileContent, InitialCompositionReader.INPUT_AREA);
-		saver.save(habitatFolder.getName() + File.separatorChar + INITIAL_COMPOSITION, preparedContent);
+		saver.saveForCurrentPoint(habitatFolder.getName(), INITIAL_COMPOSITION, preparedContent);
 		return new InitialCompositionReader(preparedContent).getInitialComposition();
 	}
 	

@@ -2,6 +2,7 @@ package hps.point.components;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class Viability {
 	
@@ -38,18 +39,21 @@ public class Viability {
 			return 0.0;
 		int aS = genotypeViability.survivalAchieveAge;
 		double S = genotypeViability.survival;
+		double curS;
 		if (age <= aS) {
 			if (age == aS)
 				return S;
 			double kbS = genotypeViability.survivalCoefficientBeforeAchiveAge;
-			double curS = genotypeViability.survivalFirst;
+			curS = genotypeViability.survivalFirst;
 			for (int curAge=0; curAge<age; curAge++)
 				curS += (S - curS) * kbS;
 		}
-		double kS = genotypeViability.survivalCoefficient;
-		double curS = S;
-		for (int curAge=aS; curAge<age; curAge++)
-			curS += (1 - curS) * kS;
+		else {
+			double kS = genotypeViability.survivalCoefficient;
+			curS = S;
+			for (int curAge=aS; curAge<age; curAge++)
+				curS += (1 - curS) * kS;
+		}
 		return curS;
 	}
 	private double computeCompetitiveness(int age, GenotypeViability genotypeViability) {
@@ -57,18 +61,21 @@ public class Viability {
 			return 0.0;
 		int aC = genotypeViability.competitivenessAchieveAge;
 		double C = genotypeViability.competitiveness;
+		double curC;
 		if (age <= aC) {
 			if (age == aC)
 				return C;
 			double kbC = genotypeViability.competitivenessCoefficientBeforeAchiveAge;
-			double curC = genotypeViability.competitivenessFirst;
+			curC = genotypeViability.competitivenessFirst;
 			for (int curAge=0; curAge<age; curAge++)
 				curC += (C - curC) * kbC;
 		}
-		double kC = genotypeViability.competitivenessCoefficient;
-		double curC = C;
-		for (int curAge=aC; curAge<age; curAge++)
-			curC += (1 - curC) * kC;
+		else {
+			double kC = genotypeViability.competitivenessCoefficient;
+			curC = C;
+			for (int curAge=aC; curAge<age; curAge++)
+				curC += (1 - curC) * kC;
+		}
 		return curC;
 	}
 	private double computeReproduction(int age, GenotypeViability genotypeViability) {
@@ -129,6 +136,18 @@ public class Viability {
 		default:
 			return genotypeViability.voracity10;
 		}
+	}
+	
+	public Set<String> getGenotypes() {
+		return genotypeViabilityMap.keySet();
+	}
+	
+	public int getGenotypeLifetime(String genotype) {
+		return genotypeViabilityMap.get(genotype).lifetime;
+	}
+	
+	public int getGenotypeSpawing(String genotype) {
+		return genotypeViabilityMap.get(genotype).spawning;
 	}
 	
 	public static class GenotypeViability {

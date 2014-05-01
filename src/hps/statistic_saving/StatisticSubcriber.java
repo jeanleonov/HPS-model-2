@@ -5,6 +5,6 @@ import hps.point_movement.PointMover.IterationSubStep;
 
 public interface StatisticSubcriber {
 
-	void saveSystemState(Point point, int year, IterationSubStep justFinishedSubStep);
+	void saveSystemState(Point point, int year, IterationSubStep justFinishedSubStep) throws Throwable;
 	
 }

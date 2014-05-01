@@ -44,4 +44,9 @@ public class IndividualsGroup implements Comparable<IndividualsGroup> {
 		int genotypesComparation = genotype.compareTo(other.genotype);
 		return genotypesComparation==0? (age-other.age) : genotypesComparation;
 	}
+	
+	@Override
+	public String toString() {
+		return genotype + "-" + age;
+	}
 }

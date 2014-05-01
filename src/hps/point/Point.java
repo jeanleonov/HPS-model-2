@@ -1,6 +1,7 @@
 package hps.point;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +17,16 @@ public class Point {
 		namedHabitats = new LinkedHashMap<>();
 		for(Habitat habitat : habitats)
 			namedHabitats.put(habitat.getHabitatName(), habitat);
+	}
+	
+	public Point(Point sourcePoint) {
+		habitats = new LinkedList<>();
+		namedHabitats = new LinkedHashMap<>();
+		for(Habitat habitat : sourcePoint.habitats) {
+			Habitat habitatClone = new Habitat(habitat);
+			habitats.add(habitatClone);
+			namedHabitats.put(habitat.getHabitatName(), habitatClone);
+		}
 	}
 
 	public List<Habitat> getHabitats() {

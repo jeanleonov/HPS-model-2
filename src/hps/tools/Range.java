@@ -33,19 +33,22 @@ public class Range implements Iterable<Integer> {
 	private static class RangeIterator implements Iterator<Integer> {
 		private int current;
 		private int last;
+		private boolean hasNext;
 		public RangeIterator(Range range) {
 			current = range.left;
 			last = range.right;
+			hasNext = true;
 		}
 		@Override
 		public boolean hasNext() {
-			return current!=last;
+			return hasNext;
 		}
 		@Override
 		public Integer next() {
-			if (last>current)
+			hasNext = current!=last;
+			if (last>=current)
 				return current++;
-			if (last<current)
+			if (last<=current)
 				return current--;
 			return null;
 		}

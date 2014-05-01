@@ -8,11 +8,11 @@ import java.util.Map;
 public class IndividualsGroupState {
 	
 	public int strength;
+	public int strengthOfYoungers=0;
 	
 	public int multipliedst;
 	
-	private String genotype;
-	private int age;
+	private IndividualsGroup group;
 	
 	private double survival;
 	private double competitiveness;
@@ -35,10 +35,9 @@ public class IndividualsGroupState {
 		fertility = groupViability.fertility;
 		amplexusRepeat = groupViability.amplexusRepeat;
 		voracity = groupViability.voracity;
-		genotype = group.getGenotype();
-		age = group.getAge();
+		this.group = group;
 		if (reproduction > 0) {
-			if (GenotypeHelper.isMale(genotype)) {
+			if (GenotypeHelper.isMale(group.getGenotype())) {
 				isMatureMale = true;
 				isMatureFemale = false;
 			}
@@ -53,6 +52,20 @@ public class IndividualsGroupState {
 		}
 		if (GenotypeHelper.isFemale(group.getGenotype()) && reproduction>0)
 			posterityComposition = posterity.getCompositionFor(group.getGenotype());
+	}
+	
+	public IndividualsGroupState(IndividualsGroupState sourceGroupState) {
+		strength = sourceGroupState.strength;
+		survival = sourceGroupState.survival;
+		competitiveness = sourceGroupState.competitiveness;
+		reproduction = sourceGroupState.reproduction;
+		fertility = sourceGroupState.fertility;
+		amplexusRepeat = sourceGroupState.amplexusRepeat;
+		voracity = sourceGroupState.voracity;
+		group = sourceGroupState.group;
+		isMatureFemale = sourceGroupState.isMatureFemale;
+		isMatureMale = sourceGroupState.isMatureMale;
+		posterityComposition = sourceGroupState.posterityComposition;
 	}
 
 	public double getSurvival() {
@@ -84,11 +97,15 @@ public class IndividualsGroupState {
 	}
 
 	public String getGenotype() {
-		return genotype;
+		return group.getGenotype();
 	}
 
 	public int getAge() {
-		return age;
+		return group.getAge();
+	}
+
+	public IndividualsGroup getGroup() {
+		return group;
 	}
 
 	public boolean isMatureMale() {
@@ -105,13 +122,13 @@ public class IndividualsGroupState {
 	
 	@Override
 	public int hashCode() {
-		return genotype.hashCode()+age;
+		return group.hashCode();
 	}
 	
 	@Override
 	public boolean equals(Object obj) {
 		IndividualsGroupState other = (IndividualsGroupState) obj;
-		return genotype.equals(other.genotype) && age==other.age;
+		return group.equals(other.group);
 	}
 	
 }

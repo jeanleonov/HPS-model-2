@@ -1,5 +1,7 @@
 package hps.tools;
 
+import hps.program_starter.HPS;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -57,6 +59,44 @@ public class Logger {
 	}
 	
 	
+	private static long startPointTime;
+	public static void openPoint() throws IOException {
+		startPointTime = System.currentTimeMillis();
+		info(String.format("Modeling of point %d have been just started",
+						   HPS.get().getCurrentPointNumber()));
+	}
+	
+	public static void closePoint() throws IOException {
+		long executingTime = System.currentTimeMillis()-startPointTime,
+				 hour = executingTime/1000/60/60,
+				 min = executingTime/1000/60 - hour*60,
+				 sec = executingTime/1000 - min*60 - hour*3600,
+				 msec = executingTime - sec*1000 - min*60000 - hour*3600000;
+		info(String.format("Point: %s, Executing time:	[%2s:%2s:%2s.%3s]",
+						   HPS.get().getCurrentPointName(),hour,min,sec,msec ));
+	}
+
+	
+	private static long startExperimentTime;
+	public static void openExperiment() throws IOException {
+		startExperimentTime = System.currentTimeMillis();
+		info(String.format("Modeling of experiment %d on point %d have been just started",
+				           HPS.get().getCurrentExperimentNumber(),
+				           HPS.get().getCurrentPointNumber()));
+	}
+	
+	public static void closeExperiment() throws IOException {
+		long executingTime = System.currentTimeMillis()-startExperimentTime,
+				 hour = executingTime/1000/60/60,
+				 min = executingTime/1000/60 - hour*60,
+				 sec = executingTime/1000 - min*60 - hour*3600,
+				 msec = executingTime - sec*1000 - min*60000 - hour*3600000;
+		info(String.format("Point: %s, Experiment: %s, Executing time:	[%2s:%2s:%2s.%3s]",
+					       HPS.get().getCurrentPointName(),
+					       HPS.get().getCurrentExperimentName(),hour,min,sec,msec ));
+	}
+	
+	
 	private static String throwableToString(Throwable throwable) {
 		StringBuffer stackTrace = new StringBuffer();
 		stackTrace.append(throwable.getMessage());
@@ -67,14 +107,13 @@ public class Logger {
 		return stackTrace.toString();
 	}
 	
-	
 	private final static String CONFIGURATION = 
 	"<log4j:configuration>" +
 	
 		"<appender name=\"ConsoleAppender\" class=\"org.apache.log4j.ConsoleAppender\">" +
 			"<param name=\"target\" value=\"System.out\"/>" +
 			"<layout class=\"org.apache.log4j.PatternLayout\">" +
-				"<param name=\"ConversionPattern\" value=\"%d{ISO8601} [%5p] %m at %l%n\"/>" +
+				"<param name=\"ConversionPattern\" value=\"%d{ISO8601} [%5p] %m%n\"/>" +
 			"</layout>" +
 			"<filter class=\"org.apache.log4j.varia.LevelRangeFilter\">" +
 				"<param name=\"LevelMin\" value=\"INFO\"/>" +
@@ -94,7 +133,7 @@ public class Logger {
 		"</appender>" +
 	
 		"<appender name=\"ErrorsFileAppender\" class=\"org.apache.log4j.DailyRollingFileAppender\">" +
-			"<param name=\"File\" value=\"log/errors\" />" +
+			"<param name=\"File\" value=\""+(String)CMDArgument.LOGS_FOLDER.getValue()+"/errors\" />" +
 			"<param name=\"DatePattern\" value=\"'-'yyyy-MM-dd-HH'.log'\" />" +
 			"<param name=\"immediateFlush\" value=\"true\"/>" +
 			"<layout class=\"org.apache.log4j.PatternLayout\">" +
@@ -115,13 +154,9 @@ public class Logger {
 	"</log4j:configuration>";
 	
 	static {
-		try {
-			File logsFolder = new File((String)CMDArgument.LOGS_FOLDER.getValue());
-			if (!logsFolder.exists() || !logsFolder.isDirectory())
-				logsFolder.createNewFile();
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
+		File logsFolder = new File((String)CMDArgument.LOGS_FOLDER.getValue());
+		if (!logsFolder.exists() || !logsFolder.isDirectory())
+			logsFolder.mkdirs();
 		Element node = null;
 		try {
 			node = DocumentBuilderFactory

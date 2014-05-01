@@ -15,6 +15,7 @@ public enum CMDArgument {
 	YEARS ('y',"years", new Integer(1), Integer.class),
 	EXPERIMENTS ('e', "experiments", new Range(1), Range.class),
 	POINTS('p', "points", new Range(1), Range.class),
+	MAX_EXPERIMENT_NUMBER("max_experiment_number", new Integer(999), Integer.class),
 	STATISTIC ("statistic", "ages with_immatures after_each", String.class),
 	EXPERIMENTS_SERIES_NAME ("name", "modeling", String.class),
 	INPUTS_FOLDER("inputs_folder", "inputs", String.class),
@@ -36,37 +37,40 @@ public enum CMDArgument {
 				"			-y 200\n" +
 				"			--years 200\n\n" +
 
-				"	[{-e, --experiments} range]  range of simulated experiments | DEFAULT \"1\"\n" + 
-				"			Examples:\n" +
-				"			-e 1..100  (1st, 2nd, ... , 100th experiments will be modelled)\n" +
-				"			-e 55      (55th experiment will be modelled)\n" +
-				"			--experiments 1..100\n\n" +
-
 				"	[{-p, --points} range]  range of point to test | DEFAULT \"1\"\n" + 
 				"			Examples:\n" +
 				"			-p 17     (17th point will be tested)\n" +
 				"			-p 1..81  (1st, 2nd, ... , 81st points will be tested)\n" +
 				"			--points 30..60\n\n" +
 
-				"   [{--statistic} string]  statistic collecting properties which match to regexp:\n | DEFAULT \"ages with_immatures after_each\""+
-				"                              ( ages\n"+
-				"                               |genotypes\n"+
-				"                               |with_immatures\n"+
-				"                               |without_immatures\n"+
+				"	[{-e, --experiments} range]  range of simulated experiments | DEFAULT \"1\"\n" + 
+				"			Examples:\n" +
+				"			-e 1..100  (1st, 2nd, ... , 100th experiments will be modelled)\n" +
+				"			-e 55      (55th experiment will be modelled)\n" +
+				"			--experiments 1..100\n\n" +
+
+				"	[{--max_experiment_number} integer]  maximal experiment number (it affects the format of output files' names) | DEFAULT \"999\"\n" + 
+				"			Examples:\n" +
+				"			-max_experiment_number 9999  (output file of 64th experiment will have name like ...0064...)\n" +
+				"			-max_experiment_number 99    (output file of 64th experiment will have name like ...64...)\n" +
+
+				"   [{--statistic} string]  statistic collecting properties which match to regexp:\n | DEFAULT \"after_each\""+
+				"                              ( only_genotypes\n"+
+				"                               |only_matures\n"+
+				"                               |only_short\n"+
 				"                               |after_each\n"+
-				"                               |after_move_and_scenario\n"+
-				"                               |after_evolution\n"+
+				"                               |after_movement\n"+
+				"                               |after_growing\n"+
 				"                               |after_reproduction\n"+
 				"                               |after_competition\n"+
 				"                               |after_dieing\n"+
 				"                              )*\n" + 
 				"			Examples:\n" +
-				"			--statistic \"ages with_immatures after_reproduction after_competition\"\n" +
-				"			--statistic \"ages without_immatures after_each\"\n" +
-				"			--statistic \"ageswithout_immatures after_dieing\"\n" +
-				"			--statistic \"genotypes with_immatures after_dieing\"\n" +
-				"			--statistic \"genotypes with_immatures after_dieing\"\n" +
-				"			--statistic \"ages without_immatures after_dieing\"\n\n" +
+				"			--statistic \"only_genotypes after_reproduction after_competition\"\n" +
+				"			--statistic \"only_matures after_each\"\n" +
+				"			--statistic \"\"\n" +
+				"			--statistic \"after_dieing\"\n" +
+				"			--statistic \"only_genotypes only_matures after_dieing\"\n" +
 
 				"	[{--inputs_folder} string]  path to a folder from which a parameters of experiments series will be taken | DEFAULT \"inputs\"" + 
 				"			Examples:\n" +
