@@ -8,12 +8,14 @@ import hps.point_initialization.PointInitialiser;
 import hps.point_movement.PointMover;
 import hps.statistic_saving.DetailedStatisticSaver;
 import hps.statistic_saving.InitialPointSaver;
+import hps.statistic_saving.ShortStatisticSaver;
 import hps.tools.CMDArgument;
 import hps.tools.CMDLineParser;
 import hps.tools.Logger;
 import hps.tools.Range;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 
 public class HPS {
 
@@ -44,7 +46,7 @@ public class HPS {
 	private int currentPointNumber;
 	private String currentPointName;
 	private int currentExperimentNumber;
-	private String currentExperimentName;
+	private String currentExperimentName; 
 	
 	private HPS() throws IOException {
 		initialPointSaver = new InitialPointSaver();
@@ -53,6 +55,7 @@ public class HPS {
 	
 	private void start() throws Throwable {
 		DetailedStatisticSaver detailedStatisticSaver = new DetailedStatisticSaver();
+		ShortStatisticSaver shortStatisticSaver = new ShortStatisticSaver();
 		for (Integer point : (Range)CMDArgument.POINTS.getValue()) {
 			currentPointNumber = point;
 			currentPointName = pointNumberToString(point);
@@ -64,11 +67,14 @@ public class HPS {
 				Logger.openExperiment();
 				PointMover pointMover = new PointMover(initialPoint);
 				pointMover.registerSubscriber(detailedStatisticSaver);
+				pointMover.registerSubscriber(shortStatisticSaver);
 				pointMover.move();
 				Logger.closeExperiment();
 			}
 			Logger.closePoint();
 		}
+		detailedStatisticSaver.finish();
+		shortStatisticSaver.finish();
 	}
 	
 	private Integer signsInPointNumber = null;
@@ -116,6 +122,10 @@ public class HPS {
 		return currentExperimentName;
 	}
 	
+
+	public LinkedHashMap<String, String> getCurrentPointDynamicValues() {
+		return pointInitialiser.getCurrentPointDynamicValues();
+	}
 
 	private static void parseArgs(String[] args) {
 		try {

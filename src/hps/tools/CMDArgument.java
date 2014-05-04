@@ -51,10 +51,10 @@ public enum CMDArgument {
 
 				"	[{--max_experiment_number} integer]  maximal experiment number (it affects the format of output files' names) | DEFAULT \"999\"\n" + 
 				"			Examples:\n" +
-				"			-max_experiment_number 9999  (output file of 64th experiment will have name like ...0064...)\n" +
-				"			-max_experiment_number 99    (output file of 64th experiment will have name like ...64...)\n" +
+				"			--max_experiment_number 9999  (output file of 64th experiment will have name like ...0064...)\n" +
+				"			--max_experiment_number 99    (output file of 64th experiment will have name like ...64...)\n\n" +
 
-				"   [{--statistic} string]  statistic collecting properties which match to regexp:\n | DEFAULT \"after_each\""+
+				"	[{--statistic} string]  statistic collecting properties which match to regexp: | DEFAULT \"after_each short_after_movement\"\n"+
 				"                              ( only_genotypes\n"+
 				"                               |only_matures\n"+
 				"                               |only_short\n"+
@@ -64,34 +64,42 @@ public enum CMDArgument {
 				"                               |after_reproduction\n"+
 				"                               |after_competition\n"+
 				"                               |after_dieing\n"+
-				"                              )*\n" + 
+				"                               |short_after_movement\n"+
+				"                               |short_after_growing\n"+
+				"                               |short_after_reproduction\n"+
+				"                               |short_after_competition\n"+
+				"                               |short_after_dieing\n"+
+				"                              )*\n" +
+				"							Write only_.. to specify constraints on output\n" +
+				"							Write after_.. to specify steps after which detailed statistic should be saved\n" +
+				"							Write short_after_.. to specify ONLY ONE step after which short statistic should be saved\n" + 
 				"			Examples:\n" +
-				"			--statistic \"only_genotypes after_reproduction after_competition\"\n" +
+				"			--statistic \"only_genotypes after_reproduction after_competition short_after_competition\"\n" +
 				"			--statistic \"only_matures after_each\"\n" +
+				"			--statistic \"short_after_reproduction\"\n" +
 				"			--statistic \"\"\n" +
 				"			--statistic \"after_dieing\"\n" +
-				"			--statistic \"only_genotypes only_matures after_dieing\"\n" +
+				"			--statistic \"only_genotypes only_matures after_dieing\"\n\n" +
 
 				"	[{--inputs_folder} string]  path to a folder from which a parameters of experiments series will be taken | DEFAULT \"inputs\"" + 
 				"			Examples:\n" +
 				"			--inputs_folder \"d:\\Modeling\\inputs\"\n" +
-				"			--inputs_folder \"subfolder of my project\"\n" +
+				"			--inputs_folder \"subfolder of my project\"\n\n" +
 
 				"	[{--statistic_folder} string]  path to a folder to which a statistic will be saved | DEFAULT \"statistic\"" + 
 				"			Examples:\n" +
 				"			--statistic_folder \"d:\\Modeling\\statistic\"\n" +
-				"			--statistic_folder \"subfolder of my project\"\n" +
+				"			--statistic_folder \"subfolder of my project\"\n\n" +
 
 				"	[{--settings_folder} string]  path to a folder to which a settings of modelled experiments will be saved | DEFAULT \"settings\"" + 
 				"			Examples:\n" +
 				"			--settings_folder \"d:\\Modeling\\settings\"\n" +
-				"			--settings_folder \"subfolder of my project\"\n" +
+				"			--settings_folder \"subfolder of my project\"\n\n" +
 
 				"	[{--logs_folder} string]  path to folder to which a logs will be saved | DEFAULT \"statistic\"" + 
 				"			Examples:\n" +
 				"			--logs_folder \"d:\\Modeling\\logs\"\n" +
-				"			--logs_folder \"subfolder of my project\"\n" +
-				"";
+				"			--logs_folder \"subfolder of my project\"\n\n";
 	
 	private static CMDLineParser parser;
 	private Character shortName;

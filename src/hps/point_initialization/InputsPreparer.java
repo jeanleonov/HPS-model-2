@@ -13,9 +13,8 @@ import hps.point_initialization.inputs_areas.CSVHelper;
 import hps.tools.Logger;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,7 +27,7 @@ public class InputsPreparer {
 	private List<DimensionType> dimensionTypes;
 	private List<Integer> totalSteps;
 	private List<Integer> currentSteps;
-	private Map<String,String> onPointValues;
+	private LinkedHashMap<String,String> onPointValues;
 	private int pointNumber;
 	private String dimensionsToTestCSV;
 	
@@ -40,7 +39,7 @@ public class InputsPreparer {
 		ENUMERATION
 	}
 
-	private static final String enumeratedValuesRegex = "(:?\\{#(?<value>(?s).*?)#\\})|(:?(?<static>(?s).+?)?(:?#\\{(?<dimension>.*?)\\}))|(?<juststatic>(?s).*)";
+	private static final String enumeratedValuesRegex = "(:?\\{#(?<value>(?s).*?)#\\})|(:?(?<static>(?s).+?)?(:?#\\{(:?(:?(?<dimension>.*?)\\((?<valueName>.*?)\\))|(?<onlyDimension>.*?))\\}))|(?<juststatic>(?s).*)";
 	private static final String computedValuesRegex = "(?<static>(?s).+?)?(:?#\\[(?<dinamic>(:?\\w+)(:?\\((:?\\w+)\\))?:(:?[\\d.,]+)-(:?[\\d.,]+))\\])|(?<juststatic>(?s).*)";
 	private static final String computedValueTemplateRegex = "(?<dimension>\\w+)(:?\\((?<valueName>\\w+)\\))?:(?<first>[\\d.,]+)-(?<last>[\\d.,]+)";
 
@@ -50,7 +49,7 @@ public class InputsPreparer {
 		this.dimensionTypes = new ArrayList<DimensionType>();
 		this.totalSteps = new ArrayList<>();
 		this.currentSteps = new ArrayList<>();
-		this.onPointValues = new HashMap<>();
+		this.onPointValues = new LinkedHashMap<>();
 		initDimensions();
 	}
 	
@@ -150,12 +149,20 @@ public class InputsPreparer {
 		StringBuilder prepared = new StringBuilder("");
 		while(matcher.find()) {
 			String staticPart = matcher.group("juststatic");
-			String dinamic = "";
+			String dynamic = "";
 			if (staticPart == null) {
 				staticPart = matcher.group("static");
 				if (staticPart == null)
 					staticPart = "";
 				String dimension = matcher.group("dimension");
+				String valueName = matcher.group("valueName");
+				if (valueName == null) {
+					dimension = matcher.group("onlyDimension");
+					int i=0;
+					valueName = dimension + "-" + i;
+					while (onPointValues.get(valueName) != null)
+						valueName = dimension + "-" + i++;
+				}
 				if (dimension != null)
 					dimension = dimension.replace(" ", "");
 				else
@@ -168,11 +175,11 @@ public class InputsPreparer {
 					if (!matcher.find() || (value = matcher.group("value")) == null)
 						throw new WrongUsageOfDimension("Enumerated values are too low for dimension "+dimension, currentInputArea);
 					if (i == currentSteps.get(dimensionIndex))
-						dinamic = value;
+						dynamic = value;
 				}
-				onPointValues.put(dimension, dinamic.replace(';', '|').replace("\n", "  //  "));
+				onPointValues.put(valueName, dynamic.replace(';', '|').replace("\n", "  //  "));
 			}
-			prepared.append(staticPart).append(dinamic);
+			prepared.append(staticPart).append(dynamic);
 		}
 		return prepared.toString();
 	}
@@ -188,8 +195,12 @@ public class InputsPreparer {
 		first = matcher.group("first");
 		last = matcher.group("last");
 		String result = translateComputed(dim, first, last);
-		if (valueName == null)
-			valueName = dim;
+		if (valueName == null) {
+			int i=0;
+			valueName = dim + "-" + i;
+			while (onPointValues.get(valueName) != null)
+				valueName = dim + "-" + i++;
+		}
 		onPointValues.put(valueName, result);
 		return result;
 	}
@@ -231,7 +242,7 @@ public class InputsPreparer {
 		throw new WrongUsageOfDimension("Enumeration dimension was used as integer of float", currentInputArea);
 	}
 	
-	public Map<String,String> getPrevPointValuesMap() {
+	public LinkedHashMap<String,String> getCurrentPointValuesMap() {
 		return onPointValues;
 	}
 }

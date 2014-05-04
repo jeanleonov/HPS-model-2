@@ -172,6 +172,10 @@ public class PointInitialiser {
 		return new InitialCompositionReader(preparedContent).getInitialComposition();
 	}
 	
+	public LinkedHashMap<String, String> getCurrentPointDynamicValues() {
+		return preparer.getCurrentPointValuesMap();
+	}
+	
 	
 	private String getFullFileContent(File file) throws IOException {
 		BufferedReader inputReader = null;

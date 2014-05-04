@@ -6,75 +6,32 @@ import hps.point.components.IndividualsGroup;
 import hps.point.components.IndividualsGroupState;
 import hps.point_movement.PointMover.IterationSubStep;
 import hps.program_starter.HPS;
-import hps.tools.CMDArgument;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class DetailedStatisticSaver implements StatisticSubcriber {
 	
-	private EnumSet<IterationSubStep> subStepsToSave;
-	private boolean onlyMatures;
-	private boolean onlyGenotypes;
-	private boolean onlyShort;
 	private LinkedHashMap<String, List<Column>> columns=null;
 	private BufferedOutputStream currentExperimentWriter=null;
 	private String currentPoint;
 	private String currentExperiment;
-	private File statisticFolder;
 	private String[] row;
-	
-	private static final Pattern SETTINGS_PATTERN = Pattern.compile(
-		   "(:?(?<onlyG>only_genotypes)"
-			+"|(?<onlyM>only_matures)"
-			+"|(?<onlyS>only_short)"
-			+"|(?<afterEach>after_each)"
-			+"|(?<afterM>after_movement)"
-			+"|(?<afterG>after_growing)"
-			+"|(?<afterR>after_reproduction)"
-			+"|(?<afterC>after_competition)"
-			+"|(?<afterD>after_dieing))*");
+	private StatisticSettings settings;
 	
 	public DetailedStatisticSaver() {
-		statisticFolder = new File((String)CMDArgument.STATISTIC_FOLDER.getValue());
-		if (!statisticFolder.exists())
-			statisticFolder.mkdirs();
-		String settings = (String)CMDArgument.STATISTIC.getValue();
-		Matcher matcher = SETTINGS_PATTERN.matcher(settings);
-		matcher.find();
-		onlyMatures = matcher.group("onlyM") != null;
-		onlyGenotypes = matcher.group("onlyG") != null;
-		onlyShort = matcher.group("onlyS") != null;
-		ArrayList<IterationSubStep> subStepsToSaveList = new ArrayList<>(IterationSubStep.values().length);
-		if (matcher.group("afterM") != null)
-			subStepsToSaveList.add(IterationSubStep.MOVEMENT);
-		if (matcher.group("afterG") != null)
-			subStepsToSaveList.add(IterationSubStep.GROWING_UP);
-		if (matcher.group("afterR") != null)
-			subStepsToSaveList.add(IterationSubStep.REPRODUCTION);
-		if (matcher.group("afterC") != null)
-			subStepsToSaveList.add(IterationSubStep.COMPETITION);
-		if (matcher.group("afterD") != null)
-			subStepsToSaveList.add(IterationSubStep.DIEING);
-		if (matcher.group("afterEach") != null || subStepsToSaveList.size()==0)
-			for (IterationSubStep step : IterationSubStep.values())
-				subStepsToSaveList.add(step);
-		subStepsToSave = EnumSet.copyOf(subStepsToSaveList);
+		settings = StatisticSettings.get();
 	}
 
 	@Override
 	public void saveSystemState(Point point, int year, IterationSubStep justFinishedSubStep) throws IOException {
-		if (onlyShort || !subStepsToSave.contains(justFinishedSubStep))
+		if (settings.onlyShort || !settings.subStepsToSave.contains(justFinishedSubStep))
 			return;
 		if (columns == null)
 			initiateColumns(point);
@@ -88,7 +45,7 @@ public class DetailedStatisticSaver implements StatisticSubcriber {
 				currentExperimentWriter.flush();
 				currentExperimentWriter.close();
 			}
-			File pointFolder = new File(statisticFolder.getPath() + "/" + HPS.get().getCurrentPointName());
+			File pointFolder = new File(settings.statisticFolder.getPath() + "/" + HPS.get().getCurrentPointName());
 			if (!pointFolder.exists())
 				pointFolder.mkdirs();
 			File experimentStatisticFile = new File(pointFolder.getPath() + "/" + HPS.get().getCurrentExperimentName() + ".csv");
@@ -104,12 +61,12 @@ public class DetailedStatisticSaver implements StatisticSubcriber {
 		columns = new LinkedHashMap<>();
 		for (Habitat habitat : point.getHabitats()) {
 			LinkedList<Column> habitatColumns = new LinkedList<>();
-			if (onlyGenotypes)
+			if (settings.onlyGenotypes)
 				for (String genotype : habitat.getViability().getGenotypes())
 					habitatColumns.add(new Column(genotype));
 			else {
 				for (String genotype : habitat.getViability().getGenotypes()) {
-					if (onlyMatures)
+					if (settings.onlyMatures)
 						for (int age=habitat.getViability().getGenotypeSpawing(genotype); age<=habitat.getViability().getGenotypeLifetime(genotype); age++)
 							habitatColumns.add(new Column(new IndividualsGroup(genotype, age)));
 					else
@@ -150,7 +107,7 @@ public class DetailedStatisticSaver implements StatisticSubcriber {
 		row[0] = year.toString();
 		row[1] = justFinishedSubStep.toString();
 		int columnNumber = 2;
-		if (onlyGenotypes)
+		if (settings.onlyGenotypes)
 			for (Entry<String, List<Column>> entry : columns.entrySet()) {
 				Habitat habitat = point.getNamedHabitats().get(entry.getKey());
 				for (Column column : entry.getValue())
@@ -180,7 +137,7 @@ public class DetailedStatisticSaver implements StatisticSubcriber {
 		int genotypeStrength = 0;
 		int lifeTime = habitat.getViability().getGenotypeLifetime(genotype);
 		int spawingTime = habitat.getViability().getGenotypeSpawing(genotype);
-		if (onlyMatures) {
+		if (settings.onlyMatures) {
 			for (int age=lifeTime; age>=spawingTime; age--) {
 				IndividualsGroupState groupState = habitat.getGroupsStates().get(new IndividualsGroup(genotype, age));
 				genotypeStrength += groupState != null? groupState.strength : 0;
@@ -195,8 +152,7 @@ public class DetailedStatisticSaver implements StatisticSubcriber {
 		return genotypeStrength;
 	}
 	
-	@Override
-	protected void finalize() throws Throwable {
+	public void finish() throws Throwable {
 		currentExperimentWriter.flush();
 		currentExperimentWriter.close();
 	}
