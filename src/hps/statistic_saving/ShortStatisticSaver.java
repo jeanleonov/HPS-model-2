@@ -6,6 +6,7 @@ import hps.point.components.IndividualsGroup;
 import hps.point.components.IndividualsGroupState;
 import hps.point_movement.PointMover.IterationSubStep;
 import hps.program_starter.HPS;
+import hps.tools.AsyncOutputStream;
 import hps.tools.CMDArgument;
 
 import java.io.BufferedOutputStream;
@@ -20,19 +21,19 @@ import java.util.Map.Entry;
 public class ShortStatisticSaver implements StatisticSubcriber {
 	
 	private LinkedHashMap<String, List<Column>> columns=null;
-	private BufferedOutputStream currentPointWriter=null;
+	private AsyncOutputStream currentPointWriter=null;
 	private String currentPoint;
 	private LinkedHashMap<String, String> pointValues;
 	private String[] row;
 	private StatisticSettings settings;
 	
-	public ShortStatisticSaver() throws IOException {
+	public ShortStatisticSaver() throws IOException, InterruptedException {
 		settings = StatisticSettings.get();
 		pointValues = HPS.get().getCurrentPointDynamicValues();
 	}
 
 	@Override
-	public void saveSystemState(Point point, int year, IterationSubStep justFinishedSubStep) throws IOException {
+	public void saveSystemState(Point point, int year, IterationSubStep justFinishedSubStep) throws IOException, InterruptedException {
 		if (year != (Integer)CMDArgument.YEARS.getValue())
 			return;
 		if (settings.shortStatisticAfter != justFinishedSubStep)
@@ -43,17 +44,15 @@ public class ShortStatisticSaver implements StatisticSubcriber {
 			!HPS.get().getCurrentPointName().equals(currentPoint))
 		{
 			currentPoint = HPS.get().getCurrentPointName();
-			if (currentPointWriter != null) {
-				currentPointWriter.flush();
+			if (currentPointWriter != null)
 				currentPointWriter.close();
-			}
 			File statisticFolder = new File(settings.statisticFolder.getPath());
 			if (!statisticFolder.exists())
 				statisticFolder.mkdirs();
 			File pointStatisticFile = new File(statisticFolder.getPath() + "/" + HPS.get().getCurrentExperimentName() + ".csv");
 			pointStatisticFile.createNewFile();
 			FileOutputStream fout = new FileOutputStream(pointStatisticFile);
-			currentPointWriter = new BufferedOutputStream(fout);
+			currentPointWriter = new AsyncOutputStream(new BufferedOutputStream(fout));
 			writeHeader();
 		}
 		writeRow(point, year, justFinishedSubStep);
@@ -116,7 +115,7 @@ public class ShortStatisticSaver implements StatisticSubcriber {
 		currentPointWriter.write((String.join(";", row) + "\n").getBytes());
 	}
 	
-	private void writeRow(Point point, Integer year, IterationSubStep justFinishedSubStep) throws IOException {
+	private void writeRow(Point point, Integer year, IterationSubStep justFinishedSubStep) throws IOException, InterruptedException {
 		row[0] = Integer.toString(HPS.get().getCurrentPointNumber());
 		row[1] = Integer.toString(year);
 		row[2] = justFinishedSubStep.toString();
@@ -173,7 +172,6 @@ public class ShortStatisticSaver implements StatisticSubcriber {
 	}
 	
 	public void finish() throws Throwable {
-		currentPointWriter.flush();
 		currentPointWriter.close();
 	}
 	

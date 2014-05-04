@@ -1,9 +1,11 @@
 package hps.statistic_saving;
 
 import hps.point_movement.PointMover.IterationSubStep;
+import hps.program_starter.HPS;
 import hps.tools.CMDArgument;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.regex.Matcher;
@@ -12,7 +14,7 @@ import java.util.regex.Pattern;
 public class StatisticSettings {
 
 	private static StatisticSettings instance = null;
-	public static StatisticSettings get() {
+	public static StatisticSettings get() throws IOException, InterruptedException {
 		if (instance == null)
 			instance = new StatisticSettings();
 		return instance;
@@ -41,8 +43,8 @@ public class StatisticSettings {
 			+"|(?<afterC>after_competition)"
 			+"|(?<afterD>after_dieing))*");
 	
-	private StatisticSettings() {
-		statisticFolder = new File((String)CMDArgument.STATISTIC_FOLDER.getValue());
+	private StatisticSettings() throws IOException, InterruptedException {
+		statisticFolder = new File(HPS.get().getOutputsFolder().getPath() + "/statistic");
 		if (!statisticFolder.exists())
 			statisticFolder.mkdirs();
 		String settings = (String)CMDArgument.STATISTIC.getValue();

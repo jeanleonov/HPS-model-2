@@ -46,7 +46,7 @@ public class PointInitialiser {
 	private File inputsFolder;
 	private InitialPointSaver saver;
 
-	public PointInitialiser(InitialPointSaver saver) throws IOException {
+	public PointInitialiser(InitialPointSaver saver) throws IOException, InterruptedException {
 		inputsFolder = new File((String)CMDArgument.INPUTS_FOLDER.getValue());
 		if (!inputsFolder.exists() || !inputsFolder.isDirectory())
 			throw new FolderDoesntExist(inputsFolder.getPath(), "but folder with inputs is strongly required");
@@ -58,7 +58,7 @@ public class PointInitialiser {
 				existingHabitats.add(file.getName());
 	}
 	
-	public Point getPoint(int pointNumber) throws IOException {
+	public Point getPoint(int pointNumber) throws IOException, InterruptedException {
 		preparer.setPoint(pointNumber);
 		List<Habitat> habitats = new LinkedList<>();
 		for (File file : inputsFolder.listFiles())
@@ -71,7 +71,7 @@ public class PointInitialiser {
 		return preparer.maxPointNumber();
 	}
 	
-	private void initiatePreparer() throws IOException {
+	private void initiatePreparer() throws IOException, InterruptedException {
 		File dimensionsCSV = new File(inputsFolder.getPath() + File.separatorChar + DIMENSIONS);
 		if (dimensionsCSV.exists() && dimensionsCSV.isFile()) {
 			String fileContent = getFullFileContent(dimensionsCSV);
@@ -85,7 +85,7 @@ public class PointInitialiser {
 		}
 	}
 	
-	private Habitat initiateHabitat(File habitatFolder) throws IOException{
+	private Habitat initiateHabitat(File habitatFolder) throws IOException, InterruptedException {
 		Viability viability = initiateViability(habitatFolder);
 		Posterity posterity = initiatePosterity(habitatFolder);
 		Scenario scenario = initiateScenario(habitatFolder);
@@ -101,7 +101,7 @@ public class PointInitialiser {
 		return new Habitat(initialComposition, viability, posterity, scenario, neighbors, resources, habitatFolder.getName());
 	}
 	
-	private Viability initiateViability(File habitatFolder) throws IOException {
+	private Viability initiateViability(File habitatFolder) throws IOException, InterruptedException {
 		File viabilityCSV = new File(habitatFolder.getPath() + File.separatorChar + VIABILITY);
 		if (!viabilityCSV.exists() || !viabilityCSV.isFile())
 			throw new FileDoesntExist(habitatFolder.getPath() + File.separatorChar + VIABILITY,
@@ -112,7 +112,7 @@ public class PointInitialiser {
 		return new ViabilityReader(preparedContent).getViability();
 	}
 	
-	private Posterity initiatePosterity(File habitatFolder) throws IOException {
+	private Posterity initiatePosterity(File habitatFolder) throws IOException, InterruptedException {
 		File posterityCSV = new File(habitatFolder.getPath() + File.separatorChar + POSTERITY);
 		if (!posterityCSV.exists() || !posterityCSV.isFile())
 			throw new FileDoesntExist(habitatFolder.getPath() + File.separatorChar + POSTERITY,
@@ -123,7 +123,7 @@ public class PointInitialiser {
 		return new PosterityReader(preparedContent).getPosterity();
 	}
 	
-	private Scenario initiateScenario(File habitatFolder) throws IOException {
+	private Scenario initiateScenario(File habitatFolder) throws IOException, InterruptedException {
 		File scenarioCSV = new File(habitatFolder.getPath() + File.separatorChar + SCENARIO);
 		String fileContent = "";
 		if (!scenarioCSV.exists() || !scenarioCSV.isFile())
@@ -135,7 +135,7 @@ public class PointInitialiser {
 		return new ScenarioReader(preparedContent).getScenario();
 	}
 
-	private Double initiateResources(File habitatFolder) throws IOException {
+	private Double initiateResources(File habitatFolder) throws IOException, InterruptedException {
 		File resourcesCSV = new File(habitatFolder.getPath() + File.separatorChar + RESOURCES);
 		if (!resourcesCSV.exists() || !resourcesCSV.isFile())
 			throw new FileDoesntExist(habitatFolder.getPath() + File.separatorChar + RESOURCES,
@@ -146,7 +146,7 @@ public class PointInitialiser {
 		return new ResourcesReader(preparedContent).getResources();
 	}
 	
-	private LinkedHashMap<String, Double> initiateNeighbors(File habitatFolder) throws IOException {
+	private LinkedHashMap<String, Double> initiateNeighbors(File habitatFolder) throws IOException, InterruptedException {
 		File neighborsCSV = new File(habitatFolder.getPath() + File.separatorChar + NEIGHBORS);
 		String fileContent = "";
 		if (!neighborsCSV.exists() || !neighborsCSV.isFile())
@@ -160,7 +160,7 @@ public class PointInitialiser {
 	}
 	
 	private LinkedHashMap<IndividualsGroup, Integer> 
-						initiateInitialComposition(File habitatFolder) throws IOException {
+						initiateInitialComposition(File habitatFolder) throws IOException, InterruptedException {
 		File initialCompositionCSV = new File(habitatFolder.getPath() + File.separatorChar + INITIAL_COMPOSITION);
 		String fileContent = "";
 		if (!initialCompositionCSV.exists() || !initialCompositionCSV.isFile())

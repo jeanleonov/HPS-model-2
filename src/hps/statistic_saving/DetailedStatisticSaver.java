@@ -6,6 +6,7 @@ import hps.point.components.IndividualsGroup;
 import hps.point.components.IndividualsGroupState;
 import hps.point_movement.PointMover.IterationSubStep;
 import hps.program_starter.HPS;
+import hps.tools.AsyncOutputStream;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -19,18 +20,18 @@ import java.util.Map.Entry;
 public class DetailedStatisticSaver implements StatisticSubcriber {
 	
 	private LinkedHashMap<String, List<Column>> columns=null;
-	private BufferedOutputStream currentExperimentWriter=null;
+	private AsyncOutputStream currentExperimentWriter=null;
 	private String currentPoint;
 	private String currentExperiment;
 	private String[] row;
 	private StatisticSettings settings;
 	
-	public DetailedStatisticSaver() {
+	public DetailedStatisticSaver() throws IOException, InterruptedException {
 		settings = StatisticSettings.get();
 	}
 
 	@Override
-	public void saveSystemState(Point point, int year, IterationSubStep justFinishedSubStep) throws IOException {
+	public void saveSystemState(Point point, int year, IterationSubStep justFinishedSubStep) throws IOException, InterruptedException {
 		if (settings.onlyShort || !settings.subStepsToSave.contains(justFinishedSubStep))
 			return;
 		if (columns == null)
@@ -41,17 +42,15 @@ public class DetailedStatisticSaver implements StatisticSubcriber {
 		{
 			currentPoint = HPS.get().getCurrentPointName();
 			currentExperiment = HPS.get().getCurrentExperimentName();
-			if (currentExperimentWriter != null) {
-				currentExperimentWriter.flush();
+			if (currentExperimentWriter != null)
 				currentExperimentWriter.close();
-			}
 			File pointFolder = new File(settings.statisticFolder.getPath() + "/" + HPS.get().getCurrentPointName());
 			if (!pointFolder.exists())
 				pointFolder.mkdirs();
 			File experimentStatisticFile = new File(pointFolder.getPath() + "/" + HPS.get().getCurrentExperimentName() + ".csv");
 			experimentStatisticFile.createNewFile();
 			FileOutputStream fout = new FileOutputStream(experimentStatisticFile);
-			currentExperimentWriter = new BufferedOutputStream(fout);
+			currentExperimentWriter = new AsyncOutputStream(new BufferedOutputStream(fout));
 			writeHeader();
 		}
 		writeRow(point, year, justFinishedSubStep);
@@ -153,7 +152,6 @@ public class DetailedStatisticSaver implements StatisticSubcriber {
 	}
 	
 	public void finish() throws Throwable {
-		currentExperimentWriter.flush();
 		currentExperimentWriter.close();
 	}
 	

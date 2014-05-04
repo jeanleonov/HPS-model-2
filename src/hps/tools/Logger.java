@@ -60,13 +60,13 @@ public class Logger {
 	
 	
 	private static long startPointTime;
-	public static void openPoint() throws IOException {
+	public static void openPoint() throws IOException, InterruptedException {
 		startPointTime = System.currentTimeMillis();
 		info(String.format("Modeling of point %d have been just started",
 						   HPS.get().getCurrentPointNumber()));
 	}
 	
-	public static void closePoint() throws IOException {
+	public static void closePoint() throws IOException, InterruptedException {
 		long executingTime = System.currentTimeMillis()-startPointTime,
 				 hour = executingTime/1000/60/60,
 				 min = executingTime/1000/60 - hour*60,
@@ -78,14 +78,14 @@ public class Logger {
 
 	
 	private static long startExperimentTime;
-	public static void openExperiment() throws IOException {
+	public static void openExperiment() throws IOException, InterruptedException {
 		startExperimentTime = System.currentTimeMillis();
 		info(String.format("Modeling of experiment %d on point %d have been just started",
 				           HPS.get().getCurrentExperimentNumber(),
 				           HPS.get().getCurrentPointNumber()));
 	}
 	
-	public static void closeExperiment() throws IOException {
+	public static void closeExperiment() throws IOException, InterruptedException {
 		long executingTime = System.currentTimeMillis()-startExperimentTime,
 				 hour = executingTime/1000/60/60,
 				 min = executingTime/1000/60 - hour*60,

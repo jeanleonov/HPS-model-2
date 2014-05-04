@@ -9,11 +9,13 @@ import hps.point_movement.PointMover;
 import hps.statistic_saving.DetailedStatisticSaver;
 import hps.statistic_saving.InitialPointSaver;
 import hps.statistic_saving.ShortStatisticSaver;
+import hps.tools.AsyncOutputStream;
 import hps.tools.CMDArgument;
 import hps.tools.CMDLineParser;
 import hps.tools.Logger;
 import hps.tools.Range;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 
@@ -33,9 +35,9 @@ public class HPS {
 	}
 	
 	private static HPS instance = null;
-	public static HPS get() throws IOException {
+	public static HPS get() throws IOException, InterruptedException {
 		if (instance == null)
-			return instance = new HPS();
+			instance = new HPS();
 		return instance;
 	}
 	
@@ -46,9 +48,17 @@ public class HPS {
 	private int currentPointNumber;
 	private String currentPointName;
 	private int currentExperimentNumber;
-	private String currentExperimentName; 
+	private String currentExperimentName;
+	private File outputsFolder;
 	
-	private HPS() throws IOException {
+	private HPS() throws IOException, InterruptedException {
+		instance = this;
+		String modelingName = (String)CMDArgument.EXPERIMENTS_SERIES_NAME.getValue();
+		outputsFolder = new File((String)CMDArgument.OUTPUTS_FOLDER.getValue() + "/" + modelingName);
+		int i=1;
+		while (outputsFolder.exists())
+			outputsFolder = new File((String)CMDArgument.OUTPUTS_FOLDER.getValue() + "/" + modelingName + "-" + i++);
+		outputsFolder.mkdirs();
 		initialPointSaver = new InitialPointSaver();
 		pointInitialiser = new PointInitialiser(initialPointSaver);
 	}
@@ -75,6 +85,7 @@ public class HPS {
 		}
 		detailedStatisticSaver.finish();
 		shortStatisticSaver.finish();
+		AsyncOutputStream.finish();
 	}
 	
 	private Integer signsInPointNumber = null;
@@ -121,7 +132,10 @@ public class HPS {
 	public String getCurrentExperimentName() {
 		return currentExperimentName;
 	}
-	
+
+	public File getOutputsFolder() {
+		return outputsFolder;
+	}
 
 	public LinkedHashMap<String, String> getCurrentPointDynamicValues() {
 		return pointInitialiser.getCurrentPointDynamicValues();

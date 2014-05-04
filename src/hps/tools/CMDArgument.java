@@ -19,8 +19,7 @@ public enum CMDArgument {
 	STATISTIC ("statistic", "ages with_immatures after_each", String.class),
 	EXPERIMENTS_SERIES_NAME ("name", "modeling", String.class),
 	INPUTS_FOLDER("inputs_folder", "inputs", String.class),
-	SETTINGS_FOLDER("settings_folder", "settings", String.class),
-	STATISTIC_FOLDER("statistic_folder", "statistic", String.class),
+	OUTPUTS_FOLDER("outputs_folder", "outputs", String.class),
 	LOGS_FOLDER("logs_folder", "logs", String.class);
 	
 	public final static String
