@@ -16,3 +16,6 @@ hs_err_pid*
 /statistic
 /settings
 /logs
+/outputs
+
+*.zip

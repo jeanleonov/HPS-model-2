@@ -53,6 +53,7 @@ public class PointInitialiser {
 		this.saver = saver;
 		initiatePreparer();
 		existingHabitats = new HashSet<>();
+		existingHabitats.add(Habitat.EXTERNAL_WORLD);
 		for (File file : inputsFolder.listFiles())
 			if (file.isDirectory())
 				existingHabitats.add(file.getName());

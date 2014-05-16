@@ -21,10 +21,11 @@ public class PointMover {
 	private Point currentPoint;
 	private int year;
 	private List<StatisticSubcriber> subscribers;
+	private double lastYearVoracity;
 	
 	private final static int
 	MAX_SIZE_OF_FEMALES_LIST = 10,
-	MAX_NUMBER_OF_REPRODUCTION_CIRCLES = 10;
+	MAX_NUMBER_OF_REPRODUCTION_CIRCLES = 50;
 	
 	public enum IterationSubStep {
 		REPRODUCTION("Reproduction"),
@@ -266,6 +267,7 @@ public class PointMover {
 			numberOfIndividuals += group.strength;
 			weightedTotalSumOfVoracity += group.strength * (group.getVoracity() * group.getCompetitiveness());
 		}
+		lastYearVoracity = totalSumOfVoracity;
 		if(totalSumOfVoracity <= habitat.getResources())
 			return;
 		double coeficient = totalSumOfVoracity-habitat.getResources();
@@ -317,45 +319,35 @@ public class PointMover {
 	
 	private void innerMigrationAndEmigration(Habitat habitat) throws Throwable {
 		Map<String, Double> migrationProbabilities = habitat.getMigrationProbabilities();
-		double totalVoracity = getTotalVoracity(habitat);
 		Set<Entry<String, Double>> entries = migrationProbabilities.entrySet();
 		Double totalWeight = (double) entries.stream().mapToDouble(entry -> entry.getValue()).sum();
 		for(IndividualsGroupState group : habitat.getGroupsStates().values()) {
 			int went = 0;
+			if (habitat.getResources() / lastYearVoracity / totalWeight >= 1)
+				continue;
 			for(int i=0; i<group.strength; i++) {
 				double weightSum = 0;
 				double point = Math.random() * totalWeight;
+				if (Math.random() <= habitat.getResources() / lastYearVoracity / totalWeight)
+					continue;
 				for (Entry<String, Double> entry : entries) {
-					if (Math.random() <= getHabitatAttractiveness(habitat, totalVoracity))
-						continue;
 					weightSum += entry.getValue();
 					if (point <= weightSum) {
 						went++;
 						if(entry.getKey().equals(Habitat.EXTERNAL_WORLD))
-							continue;
+							break;
 						String genotype = group.getGenotype();
 						int age = group.getAge();
 						Habitat newHabitat = currentPoint.getNamedHabitats().get(entry.getKey());
 						IndividualsGroup newGroup = new IndividualsGroup(genotype, age);
 						newHabitat.getState(newGroup).strength++;
+						break;
 					}
 				}
 			}
 			group.strength -= went;
 		}
 		notifySubscribers(IterationSubStep.MOVEMENT);
-	}
-	
-	private double getTotalVoracity(Habitat habitat) {
-		double total = 0.0;
-		for (IndividualsGroupState group : habitat.getGroupsStates().values())
-			total += group.strength * group.getVoracity();
-		return total == 0.0? 0.00000000001 : total;
-	}
-	
-	private double getHabitatAttractiveness(Habitat habitat, double totalVoracity) {
-		double preResult = habitat.getResources() / totalVoracity;
-		return preResult > 1.0 ? 1.0 : preResult;
 	}
 
 	/*

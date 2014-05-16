@@ -152,7 +152,8 @@ public class DetailedStatisticSaver implements StatisticSubcriber {
 	}
 	
 	public void finish() throws Throwable {
-		currentExperimentWriter.close();
+		if (currentExperimentWriter != null)
+			currentExperimentWriter.close();
 	}
 	
 	

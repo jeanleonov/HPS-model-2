@@ -49,7 +49,7 @@ public class ShortStatisticSaver implements StatisticSubcriber {
 			File statisticFolder = new File(settings.statisticFolder.getPath());
 			if (!statisticFolder.exists())
 				statisticFolder.mkdirs();
-			File pointStatisticFile = new File(statisticFolder.getPath() + "/" + HPS.get().getCurrentExperimentName() + ".csv");
+			File pointStatisticFile = new File(statisticFolder.getPath() + "/" + HPS.get().getCurrentPointName() + ".csv");
 			pointStatisticFile.createNewFile();
 			FileOutputStream fout = new FileOutputStream(pointStatisticFile);
 			currentPointWriter = new AsyncOutputStream(new BufferedOutputStream(fout));

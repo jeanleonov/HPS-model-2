@@ -6,12 +6,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class AsyncOutputStream {
 	
 	private final static WriterThread writerThreadAction;
 	private final static Thread writerThread;
 	private static boolean hasToFinish = false;
+	private static Lock bufferedBytesLock = new ReentrantLock();
+	private static int bufferedBytes = 0;
+	private static int BUFFER_SIZE = 33554432; 
+	private static AsyncOutputStream waitingObject=null;
 	static {
 		writerThreadAction = new WriterThread();
 		writerThread = new Thread(writerThreadAction);
@@ -36,7 +42,23 @@ public class AsyncOutputStream {
 	}
 	
 	public void write(byte[] bytesToWrite) throws IOException {
+		bufferedBytesLock.lock();
+		bufferedBytes += bytesToWrite.length;
+		bufferedBytesLock.unlock();
 		item.buffers.add(bytesToWrite);
+		if (bufferedBytes > BUFFER_SIZE) {
+			bufferedBytesLock.lock();
+			waitingObject = this;
+			bufferedBytesLock.unlock();
+			synchronized (this) {
+				try {
+					this.wait(200);
+				} catch (InterruptedException e) {
+					Logger.error(e);
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 	
 	public void close() throws InterruptedException {
@@ -46,8 +68,14 @@ public class AsyncOutputStream {
 	private static class WriterThread implements Runnable {
 		@Override
 		public void run() {
-			while (!hasToFinish || outputsQueue.size()!=0) {
-				if (outputsQueue.size()==0)
+			while (!hasToFinish || outputsQueue.size() != 0) {
+				if (outputsQueue.size() == 0) {
+					if (waitingObject != null) {
+						bufferedBytesLock.lock();
+						waitingObject.notify();
+						waitingObject = null;
+						bufferedBytesLock.unlock();
+					}
 					try {
 						Thread.sleep(100);
 					} catch (InterruptedException e1) {
@@ -55,6 +83,7 @@ public class AsyncOutputStream {
 						Logger.error(e1);
 						e1.printStackTrace();
 					}
+				}
 				else {
 					GlobalQueueItem item = outputsQueue.remove();
 					while (!item.noMore || item.buffers.size() != 0) {
@@ -68,7 +97,11 @@ public class AsyncOutputStream {
 							}
 						else
 							try {
-								item.out.write(item.buffers.remove());
+								byte[] bytesTowrite = item.buffers.remove();
+								item.out.write(bytesTowrite);
+								bufferedBytesLock.lock();
+								bufferedBytes -= bytesTowrite.length;
+								bufferedBytesLock.unlock();
 							} catch (IOException e) {
 								Logger.error("Error while writting in parallel");
 								Logger.error(e);
