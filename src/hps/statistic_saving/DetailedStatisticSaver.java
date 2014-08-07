@@ -31,7 +31,7 @@ public class DetailedStatisticSaver implements StatisticSubcriber {
 	}
 
 	@Override
-	public void saveSystemState(Point point, int year, IterationSubStep justFinishedSubStep) throws IOException, InterruptedException {
+	public void saveSystemState(Point point, int experiment, int year, IterationSubStep justFinishedSubStep) throws IOException, InterruptedException {
 		if (settings.onlyShort || !settings.subStepsToSave.contains(justFinishedSubStep))
 			return;
 		if (columns == null)

@@ -26,15 +26,19 @@ public class ShortStatisticSaver implements StatisticSubcriber {
 	private LinkedHashMap<String, String> pointValues;
 	private String[] row;
 	private StatisticSettings settings;
+	private Integer reportInterval;
 	
 	public ShortStatisticSaver() throws IOException, InterruptedException {
 		settings = StatisticSettings.get();
 		pointValues = HPS.get().getCurrentPointDynamicValues();
+		reportInterval = (Integer)CMDArgument.REPORT_INTERVAL.getValue();
+		if (reportInterval == null)
+			reportInterval = (Integer)CMDArgument.YEARS.getValue();
 	}
 
 	@Override
-	public void saveSystemState(Point point, int year, IterationSubStep justFinishedSubStep) throws IOException, InterruptedException {
-		if (year != (Integer)CMDArgument.YEARS.getValue())
+	public void saveSystemState(Point point, int experiment, int year, IterationSubStep justFinishedSubStep) throws IOException, InterruptedException {
+		if (year % reportInterval == 0)
 			return;
 		if (settings.shortStatisticAfter != justFinishedSubStep)
 			return;
@@ -55,7 +59,7 @@ public class ShortStatisticSaver implements StatisticSubcriber {
 			currentPointWriter = new AsyncOutputStream(new BufferedOutputStream(fout));
 			writeHeader();
 		}
-		writeRow(point, year, justFinishedSubStep);
+		writeRow(point, experiment, year, justFinishedSubStep);
 	}
 	
 	private void initiateColumns(Point point) {
@@ -86,7 +90,7 @@ public class ShortStatisticSaver implements StatisticSubcriber {
 	}
 	
 	private int getNumberOfColumns() {
-		int result = 3;
+		int result = 4;
 		for (Entry<String, List<Column>> entry : columns.entrySet())
 			result += entry.getValue().size();
 		return result;
@@ -103,9 +107,10 @@ public class ShortStatisticSaver implements StatisticSubcriber {
 					row[columnNumber++] = entry.getKey();
 		currentPointWriter.write((String.join(";", row) + "\n").getBytes());
 		row[0] = "Point#";
-		row[1] = "Year#";
-		row[2] = "After subiteration";
-		columnNumber = 3;
+		row[1] = "Experiment#";
+		row[2] = "Year#";
+		row[3] = "After subiteration";
+		columnNumber = 4;
 		for (Column column : columns.get(""))
 			row[columnNumber++] = column.dynamicValueName;
 		for (Entry<String, List<Column>> entry : columns.entrySet())
@@ -115,11 +120,12 @@ public class ShortStatisticSaver implements StatisticSubcriber {
 		currentPointWriter.write((String.join(";", row) + "\n").getBytes());
 	}
 	
-	private void writeRow(Point point, Integer year, IterationSubStep justFinishedSubStep) throws IOException, InterruptedException {
+	private void writeRow(Point point, Integer experiment, Integer year, IterationSubStep justFinishedSubStep) throws IOException, InterruptedException {
 		row[0] = Integer.toString(HPS.get().getCurrentPointNumber());
-		row[1] = Integer.toString(year);
-		row[2] = justFinishedSubStep.toString();
-		int columnNumber = 3;
+		row[1] = Integer.toString(experiment);
+		row[2] = Integer.toString(year);
+		row[3] = justFinishedSubStep.toString();
+		int columnNumber = 4;
 		for (Column column : columns.get(""))
 			row[columnNumber++] = pointValues.get(column.dynamicValueName);
 		if (settings.onlyGenotypes)

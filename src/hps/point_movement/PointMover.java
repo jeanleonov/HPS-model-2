@@ -8,6 +8,7 @@ import hps.statistic_saving.StatisticSubcriber;
 import hps.tools.CMDArgument;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,6 +21,7 @@ public class PointMover {
 
 	private Point currentPoint;
 	private int year;
+	private int experiment;
 	private List<StatisticSubcriber> subscribers;
 	private double lastYearVoracity;
 	
@@ -45,9 +47,10 @@ public class PointMover {
 	
 	private Random rand = new Random();
 	
-	public PointMover(Point firstPoint) {
+	public PointMover(Point firstPoint, int experiment) {
 		currentPoint = new Point(firstPoint);
 		year = 1;
+		this.experiment = experiment;
 		subscribers = new LinkedList<>();
 	}
 	
@@ -57,7 +60,7 @@ public class PointMover {
 	
 	private void notifySubscribers(IterationSubStep justFinishedSubStep) throws Throwable {
 		for (StatisticSubcriber subscriber : subscribers)
-			subscriber.saveSystemState(currentPoint, year, justFinishedSubStep);
+			subscriber.saveSystemState(currentPoint, experiment, year, justFinishedSubStep);
 	}
 	
 	public void registerSubscriber(StatisticSubcriber subscriber) {
@@ -238,7 +241,8 @@ public class PointMover {
 				habitat.getState(childsGroup).strength += born;
 			}
 		}
-		father.multipliedst += 1;
+		if ((double)(father.strength - father.multipliedst) / father.strength < Math.random())
+			father.multipliedst += 1;
 		mother.multipliedst += 1;
 	}
 
@@ -257,31 +261,27 @@ public class PointMover {
 	}
 	
 	private void simulateCompetition(Habitat habitat) throws Throwable {
-		double totalSumOfAntiCompetetiveness = 0;
-		double totalSumOfVoracity = 0;
-		double weightedTotalSumOfVoracity = 0;
-		int numberOfIndividuals = 0;
+		double totalVoracity = 0;
+		double totalAntiCompetitiveness = 0;
 		for(IndividualsGroupState group : habitat.getGroupsStates().values()) {
-			totalSumOfAntiCompetetiveness += group.strength * (1.0 - group.getCompetitiveness());
-			totalSumOfVoracity += group.strength * group.getVoracity();
-			numberOfIndividuals += group.strength;
-			weightedTotalSumOfVoracity += group.strength * (group.getVoracity() * group.getCompetitiveness());
+			totalVoracity += group.strength * group.getVoracity();
+			totalAntiCompetitiveness += group.strength * (1 - group.getCompetitiveness());
 		}
-		lastYearVoracity = totalSumOfVoracity;
-		if(totalSumOfVoracity <= habitat.getResources())
-			return;
-		double coeficient = totalSumOfVoracity-habitat.getResources();
-		coeficient /= habitat.getResources();
-		coeficient *= numberOfIndividuals;
-		coeficient /= totalSumOfAntiCompetetiveness;
-		coeficient *= weightedTotalSumOfVoracity;
-		coeficient /= totalSumOfVoracity;
-		for(IndividualsGroupState group : habitat.getGroupsStates().values()) {
-			int dead = 0;
-			for(int i=0; i<group.strength; i++)
-				if (Math.random() > group.getCompetitiveness()/coeficient)
-					dead++;
-			group.strength -= dead;
+		while (totalVoracity > habitat.getResources()) {
+			IndividualsGroupState looser = null;
+			Iterator<IndividualsGroupState> iterator = habitat.getGroupsStates().values().iterator();
+			double point = Math.random() * totalAntiCompetitiveness;
+			while (point > 0.0 && iterator.hasNext()) {
+				looser = iterator.next();
+				point -= (1 - looser.getCompetitiveness()) * looser.strength;
+			}
+			if (looser != null) {
+				totalVoracity -= looser.getVoracity();
+				totalAntiCompetitiveness -= 1 - looser.getCompetitiveness();
+				looser.strength--;
+			}
+			else
+				break;
 		}
 	}
 	

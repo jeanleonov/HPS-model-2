@@ -75,7 +75,7 @@ public class HPS {
 				currentExperimentNumber = experiment;
 				currentExperimentName = experimentNumberToString(experiment);
 				Logger.openExperiment();
-				PointMover pointMover = new PointMover(initialPoint);
+				PointMover pointMover = new PointMover(initialPoint, experiment);
 				pointMover.registerSubscriber(detailedStatisticSaver);
 				pointMover.registerSubscriber(shortStatisticSaver);
 				pointMover.move();

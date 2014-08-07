@@ -65,6 +65,8 @@ public class PosterityReader {
 			} catch (NumberFormatException e) {
 				throw new NotDouble(row[i], INPUT_AREA, rowNumber, i+1);
 			}
+			if (percentage > 0.0)
+				
 			composition.put(header[i], percentage);
 		}
 		posterity.addCompositionFor(mother, father, composition);

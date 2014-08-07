@@ -13,14 +13,17 @@ public enum CMDArgument {
 
 	HELP ("help", Boolean.FALSE, Boolean.class),
 	YEARS ('y',"years", new Integer(1), Integer.class),
+	REPORT_INTERVAL ('r',"report_interval", null, Integer.class),
 	EXPERIMENTS ('e', "experiments", new Range(1), Range.class),
 	POINTS('p', "points", new Range(1), Range.class),
 	MAX_EXPERIMENT_NUMBER("max_experiment_number", new Integer(999), Integer.class),
 	STATISTIC ("statistic", "ages with_immatures after_each", String.class),
 	EXPERIMENTS_SERIES_NAME ("name", "modeling", String.class),
+	USE_EXISTENT_FOLDER ("use_existent_folder", Boolean.FALSE, Boolean.class),
 	INPUTS_FOLDER("inputs_folder", "inputs", String.class),
 	OUTPUTS_FOLDER("outputs_folder", "outputs", String.class),
-	LOGS_FOLDER("logs_folder", "logs", String.class);
+	LOGS_FOLDER("logs_folder", "logs", String.class),
+	PYTHON_PATH("python_path", "python", String.class);
 	
 	public final static String
 	HELP_TEXT = "Usage:\n" +
@@ -35,6 +38,11 @@ public enum CMDArgument {
 				"			Examples:\n" +
 				"			-y 200\n" +
 				"			--years 200\n\n" +
+
+				"	[{-r, --report_interval} int]  length of years interval after which short statistic will be reported| DEFAULT after last year\n" + 
+				"			Examples:\n" +
+				"			-r 100\n" +
+				"			--report_interval 50\n\n" +
 
 				"	[{-p, --points} range]  range of point to test | DEFAULT \"1\"\n" + 
 				"			Examples:\n" +
@@ -80,6 +88,10 @@ public enum CMDArgument {
 				"			--statistic \"after_dieing\"\n" +
 				"			--statistic \"only_genotypes only_matures after_dieing\"\n\n" +
 
+				"	[{--use_existent_folder} bool] enables to use existing folders (forbids to create a folder like \"folder-1\") | DEFAULT false" + 
+				"			Examples:\n" +
+				"			--use_existing_folder\n" +
+
 				"	[{--inputs_folder} string]  path to a folder from which a parameters of experiments series will be taken | DEFAULT \"inputs\"" + 
 				"			Examples:\n" +
 				"			--inputs_folder \"d:\\Modeling\\inputs\"\n" +
@@ -98,7 +110,11 @@ public enum CMDArgument {
 				"	[{--logs_folder} string]  path to folder to which a logs will be saved | DEFAULT \"statistic\"" + 
 				"			Examples:\n" +
 				"			--logs_folder \"d:\\Modeling\\logs\"\n" +
-				"			--logs_folder \"subfolder of my project\"\n\n";
+				"			--logs_folder \"subfolder of my project\"\n\n" +
+
+				"	[{--python_path} string]  path to python interpreter | DEFAULT \"python\"" + 
+				"			Examples:\n" +
+				"			--python_path \"c:\\Python27\\python.exe\"\n";
 	
 	private static CMDLineParser parser;
 	private Character shortName;
