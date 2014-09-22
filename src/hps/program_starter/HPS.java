@@ -15,8 +15,10 @@ import hps.tools.CMDLineParser;
 import hps.tools.Logger;
 import hps.tools.Range;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.LinkedHashMap;
 
 public class HPS {
@@ -86,6 +88,22 @@ public class HPS {
 		detailedStatisticSaver.finish();
 		shortStatisticSaver.finish();
 		AsyncOutputStream.finish();
+        try {
+        	String python = (String)CMDArgument.PYTHON_PATH.getValue();
+        	String statisticFolder = outputsFolder.getPath() + File.separator + "statistic";
+        	String command = python + " agglutinate.py \""+ statisticFolder +"\"";
+            Process agglutinatingProcess = Runtime.getRuntime().exec(command);
+            BufferedReader stdInput = new BufferedReader(new InputStreamReader(agglutinatingProcess.getInputStream()));
+            BufferedReader stdError = new BufferedReader(new InputStreamReader(agglutinatingProcess.getErrorStream()));
+            String programOutput;
+            while ((programOutput = stdInput.readLine()) != null) 
+                Logger.info(programOutput);
+            while ((programOutput = stdError.readLine()) != null) 
+                Logger.warning(programOutput);
+        }
+        catch (IOException e) {
+        	Logger.error(e);
+        }
 	}
 	
 	private Integer signsInPointNumber = null;

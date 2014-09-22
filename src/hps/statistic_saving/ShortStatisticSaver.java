@@ -97,8 +97,8 @@ public class ShortStatisticSaver implements StatisticSubcriber {
 	}
 	
 	private void writeHeader() throws IOException {
-		row[0] = row[1] = row[2] = "";
-		int columnNumber = 3;
+		row[0] = row[1] = row[2] = row[3] = "";
+		int columnNumber = 4;
 		for (int i=0; i<columns.get("").size(); i++)
 			row[columnNumber++] = "";
 		for (Entry<String, List<Column>> entry : columns.entrySet())

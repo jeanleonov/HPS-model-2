@@ -16,7 +16,7 @@ public class AsyncOutputStream {
 	private static boolean hasToFinish = false;
 	private static Lock bufferedBytesLock = new ReentrantLock();
 	private static int bufferedBytes = 0;
-	private static int BUFFER_SIZE = 33554432; 
+	private static int BUFFER_SIZE = 65536; 
 	private static AsyncOutputStream waitingObject=null;
 	static {
 		writerThreadAction = new WriterThread();
