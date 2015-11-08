@@ -38,7 +38,7 @@ public class ShortStatisticSaver implements StatisticSubcriber {
 
 	@Override
 	public void saveSystemState(Point point, int experiment, int year, IterationSubStep justFinishedSubStep) throws IOException, InterruptedException {
-		if (year % reportInterval == 0)
+		if (year % reportInterval != 0)
 			return;
 		if (settings.shortStatisticAfter != justFinishedSubStep)
 			return;
